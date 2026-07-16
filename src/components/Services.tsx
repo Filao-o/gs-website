@@ -34,7 +34,7 @@ const advantages = [
 
 export default function Services() {
   return (
-    <section id="services" className="py-16 lg:py-24 bg-white">
+    <section id="services" className="py-16 lg:py-24 bg-[#F5F4F0]">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
         <div className="text-center mb-10 lg:mb-16">
@@ -52,45 +52,46 @@ export default function Services() {
           {services.map((s) => (
             <div
               key={s.title}
-              className="bg-[#091424] rounded-2xl p-8"
+              className="bg-white rounded-b-2xl overflow-hidden shadow-sm"
             >
-              <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center mb-6">
-                <s.icon size={22} className="text-white" />
+              <div className="h-4 bg-[#1FA3BA]" />
+              <div className="p-8">
+                <div className="w-12 h-12 rounded-xl bg-[#091424]/8 flex items-center justify-center mb-6">
+                  <s.icon size={22} className="text-[#091424]" />
+                </div>
+                <h3 className="font-heading text-[#091424] text-xl font-medium mb-3">
+                  {s.title}
+                </h3>
+                <p className="text-[#091424]/50 text-sm leading-relaxed">
+                  {s.desc}
+                </p>
               </div>
-              <h3 className="font-heading text-white text-xl font-medium mb-3">
-                {s.title}
-              </h3>
-              <p className="text-white/60 text-sm leading-relaxed">
-                {s.desc}
-              </p>
             </div>
           ))}
         </div>
 
         {/* Value proposition */}
-        <div className="bg-[#091424] rounded-3xl p-7 sm:p-10 lg:p-14 grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+        <div className="bg-white rounded-3xl p-7 sm:p-10 lg:p-12 grid lg:grid-cols-2 gap-8 lg:gap-10 items-center shadow-sm">
           <div>
-            <h3 className="font-heading text-white text-3xl md:text-4xl font-light leading-tight">
+            <h3 className="font-heading text-[#091424] text-3xl md:text-4xl font-light leading-tight">
               Pas un taxi.<br />
               <span className="italic text-[#1FA3BA]">Votre chauffeur.</span>
             </h3>
-            <p className="text-white/50 mt-4 leading-relaxed">
-              Sébastien n'est pas un chauffeur parmi d'autres. C'est votre
-              interlocuteur direct, disponible à toute heure, qui connaît votre
-              nom et anticipe vos besoins avant même que vous les exprimiez.
+            <p className="text-[#091424]/50 mt-4 leading-relaxed">
+              Sébastien n'est pas un chauffeur parmi d'autres.<br />
+              C'est votre interlocuteur direct, disponible à toute heure,<br />
+              qui connaît votre nom et anticipe vos besoins avant même que vous les exprimiez.
             </p>
           </div>
 
-          {/* Avantages — icônes alignées sur même colonne, bloc poussé à droite */}
-          <div className="lg:flex lg:justify-end">
-            <div className="flex flex-col gap-3">
-              {advantages.map((a) => (
-                <div key={a} className="flex items-center gap-3">
-                  <CheckCircle size={16} className="text-[#1FA3BA] shrink-0" />
-                  <span className="text-white/70 text-sm lg:text-base">{a}</span>
-                </div>
-              ))}
-            </div>
+          {/* Avantages */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+            {advantages.map((a) => (
+              <div key={a} className="flex items-center gap-3">
+                <CheckCircle size={15} className="text-[#1FA3BA] shrink-0" />
+                <span className="text-[#091424]/70 text-sm">{a}</span>
+              </div>
+            ))}
           </div>
         </div>
 

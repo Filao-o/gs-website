@@ -8,12 +8,12 @@ const links = [
   { label: "Services", href: "/#services" },
   { label: "À propos", href: "/#chauffeur" },
   { label: "Avis", href: "/#avis" },
-  { label: "Blog", href: "/blog" },
 ];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [active, setActive] = useState("/");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
@@ -27,7 +27,7 @@ export default function Navbar() {
         scrolled ? "bg-[#091424]/95 backdrop-blur-md pt-3 pb-3 shadow-xl" : ""
       }`}
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="max-w-7xl mx-auto flex items-center justify-center">
 
         {/* Logo — pill de fond sur hero, texte navy au scroll */}
         <a href="/" className="hidden flex items-center gap-2 z-10">
@@ -49,12 +49,13 @@ export default function Navbar() {
               : "bg-[#091424]/50 backdrop-blur-md border border-white/20"
           }`}
         >
-          {links.map((l, i) => (
+          {links.map((l) => (
             <a
               key={l.label}
               href={l.href}
+              onClick={() => setActive(l.href)}
               className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
-                i === 0
+                active === l.href
                   ? "bg-white text-[#091424] shadow-sm"
                   : "text-white/80 hover:text-white hover:bg-white/10"
               }`}

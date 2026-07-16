@@ -81,7 +81,12 @@ export default function Hero() {
       {/* Background */}
       <div className="absolute inset-0">
         <Image src="/Hero/hero-bg.webp" alt="Route côtière de La Réunion" fill priority className="object-cover object-center" />
-        <div className="absolute inset-0 bg-[#091424]/35" />
+        {/* Overlay global léger */}
+        <div className="absolute inset-0 bg-[#091424]/25" />
+        {/* Dégradé sombre côté gauche pour lisibilité du texte */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(9,20,36,0.85) 0%, rgba(9,20,36,0.55) 45%, transparent 70%)" }} />
+        {/* Dégradé bas pour les cards */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(9,20,36,0.4) 0%, transparent 40%)" }} />
       </div>
 
       {/* Contenu principal */}

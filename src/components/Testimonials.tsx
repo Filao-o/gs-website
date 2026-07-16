@@ -1,3 +1,5 @@
+"use client";
+
 import { Star, Quote } from "lucide-react";
 
 const reviews = [
@@ -48,57 +50,72 @@ const reviews = [
   },
 ];
 
+const DOUBLED = [...reviews, ...reviews];
+
+function ReviewCard({ r }: { r: typeof reviews[0] }) {
+  return (
+    <div className="shrink-0 w-[320px] lg:w-[380px] bg-white rounded-2xl p-7 shadow-sm flex flex-col gap-4">
+      <Quote size={24} className="text-[#091424]/15" />
+      <p className="text-[#091424]/70 leading-relaxed text-sm flex-1">{r.text}</p>
+      <div className="flex items-center justify-between pt-2 border-t border-[#091424]/8">
+        <div>
+          <p className="font-medium text-[#091424] text-sm">{r.name}</p>
+          <p className="text-[#091424]/40 text-xs">{r.date}</p>
+        </div>
+        <div className="flex gap-1">
+          {[...Array(5)].map((_, i) => (
+            <Star key={i} size={16} fill="#1FA3BA" className="text-[#1FA3BA]" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Testimonials() {
   return (
-    <section id="avis" className="py-16 lg:py-24 bg-[#091424] overflow-hidden">
+    <section id="avis" className="py-16 lg:py-24 bg-[#F5F4F0] overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
         {/* Header */}
         <div className="text-center mb-10 lg:mb-16">
-          <h2 className="font-heading text-white text-4xl md:text-5xl font-light">
+          <h2 className="font-heading text-[#091424] text-4xl md:text-5xl font-light">
             Ils nous font confiance
           </h2>
           <div className="flex items-center justify-center gap-2 mt-6">
             {[...Array(5)].map((_, i) => (
               <Star key={i} size={20} fill="#1FA3BA" className="text-[#1FA3BA]" />
             ))}
-            <span className="ml-2 text-white/50 text-sm font-medium">5,0 / 5 — 50+ avis</span>
+            <span className="ml-2 text-[#091424]/40 text-sm font-medium">5,0 / 5 — 50+ avis</span>
           </div>
         </div>
 
-        {/* Reviews grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {reviews.map((r) => (
-            <div
-              key={r.name}
-              className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <Quote size={28} className="text-[#091424]/15 mb-4" />
-              <p className="text-[#091424]/70 leading-relaxed text-sm mb-6">{r.text}</p>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-[#091424] text-sm">{r.name}</p>
-                  <p className="text-[#091424]/40 text-xs">{r.date}</p>
-                </div>
-                <div className="flex gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={12} fill="#091424" className="text-[#091424]" />
-                  ))}
-                </div>
-              </div>
-            </div>
+      </div>
+
+      {/* Ticker — full width, hors du container */}
+      <div className="relative">
+        {/* Fade left */}
+        <div className="absolute left-0 top-0 bottom-0 w-24 lg:w-40 z-10 pointer-events-none"
+          style={{ background: "linear-gradient(to right, #F5F4F0, transparent)" }} />
+        {/* Fade right */}
+        <div className="absolute right-0 top-0 bottom-0 w-24 lg:w-40 z-10 pointer-events-none"
+          style={{ background: "linear-gradient(to left, #F5F4F0, transparent)" }} />
+
+        <div className="flex gap-5 ticker-track">
+          {DOUBLED.map((r, i) => (
+            <ReviewCard key={i} r={r} />
           ))}
         </div>
+      </div>
 
-        {/* CTA */}
-        <div className="text-center mt-12">
-          <a
-            href="/#reservation"
-            className="inline-block bg-white text-[#091424] font-medium px-8 py-4 rounded-full text-sm hover:bg-[#F5F4F0] transition-all"
-          >
-            Rejoindre nos clients satisfaits
-          </a>
-        </div>
+      {/* CTA */}
+      <div className="text-center mt-12">
+        <a
+          href="/#reservation"
+          className="inline-block bg-[#091424] text-white font-medium px-8 py-4 rounded-full text-sm hover:bg-[#091424]/85 transition-all"
+        >
+          Rejoindre nos clients satisfaits
+        </a>
       </div>
     </section>
   );

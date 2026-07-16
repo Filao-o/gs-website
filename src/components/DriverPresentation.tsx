@@ -25,7 +25,7 @@ const details = [
 
 export default function DriverPresentation() {
   return (
-    <section id="chauffeur" className="py-16 lg:py-24 bg-white">
+    <section id="chauffeur" className="py-16 lg:py-24 bg-[#091424]">
       <div className="max-w-[1400px] mx-auto px-10 lg:px-16">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-end">
 
@@ -42,23 +42,23 @@ export default function DriverPresentation() {
             {/* Badge */}
             <div className="absolute bottom-4 right-4 lg:-bottom-6 lg:-right-6 bg-[#1FA3BA] rounded-2xl p-4 lg:p-6 shadow-xl">
               <p className="font-heading text-3xl lg:text-4xl font-bold text-white">5★</p>
-              <p className="text-sm text-white/80 mt-1">Note moyenne</p>
-              <p className="text-sm text-white/60">+50 avis vérifiés</p>
+              <p className="text-sm text-white mt-1">Note moyenne</p>
+              <p className="text-sm text-white">+50 avis vérifiés</p>
             </div>
           </div>
 
           {/* Content */}
           <div className="lg:pb-6">
-            <h2 className="font-heading text-[#091424] text-3xl sm:text-4xl md:text-5xl font-light leading-tight mb-5 lg:mb-6">
+            <h2 className="font-heading text-white text-3xl sm:text-4xl md:text-5xl font-light leading-tight mb-5 lg:mb-6">
               Sébastien,
               <span className="block italic text-[#1FA3BA]">votre chauffeur VTC</span>
             </h2>
-            <p className="text-[#091424]/70 leading-relaxed mb-4 text-sm sm:text-base">
+            <p className="text-white/60 leading-relaxed mb-4 text-sm sm:text-base">
               Sébastien a créé GS Transport avec une conviction simple : un trajet en VTC
               doit être aussi agréable qu'efficace. Pas de surprise, pas d'attente —
               juste un service irréprochable, à chaque course.
             </p>
-            <p className="text-[#091424]/70 leading-relaxed mb-6 text-sm sm:text-base">
+            <p className="text-white/60 leading-relaxed mb-6 text-sm sm:text-base">
               De Sainte-Marie à Saint-Leu, il couvre toute la zone nord-ouest de l'île,
               24h/24, dans une SUV neuve. Aéroport, hôtel, soirée ou rendez-vous pro —
               il s'adapte à votre agenda, pas l'inverse.
@@ -66,13 +66,13 @@ export default function DriverPresentation() {
 
             <div className="flex flex-col gap-3">
               {details.map((d) => (
-                <div key={d.title} className="bg-[#091424] rounded-2xl px-5 py-4">
+                <div key={d.title} className="bg-white/10 border border-white/15 rounded-2xl px-5 py-4">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                     <p className="font-semibold text-white text-base">{d.title}</p>
-                    <span className="text-white/30 hidden sm:inline">–––</span>
-                    <p className="text-white/60 text-base hidden sm:inline">{d.desc}</p>
+                    <span className="text-white/40 hidden sm:inline">–––</span>
+                    <p className="text-white/70 text-base hidden sm:inline">{d.desc}</p>
                   </div>
-                  <p className="text-white/70 text-sm mt-1.5 leading-relaxed">{d.sub}</p>
+                  <p className="text-white/55 text-sm mt-1.5 leading-relaxed">{d.sub}</p>
                 </div>
               ))}
             </div>

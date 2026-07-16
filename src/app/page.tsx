@@ -4,6 +4,7 @@ import ReservationSection from "@/components/ReservationSection";
 import DriverPresentation from "@/components/DriverPresentation";
 import Testimonials from "@/components/Testimonials";
 import Services from "@/components/Services";
+import CTABanner from "@/components/CTABanner";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -16,6 +17,7 @@ export default function Home() {
         <DriverPresentation />
         <Services />
         <Testimonials />
+        <CTABanner />
       </main>
       <Footer />
     </>
