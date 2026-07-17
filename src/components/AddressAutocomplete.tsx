@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { MapPin, Locate, Loader2 } from "lucide-react";
+import { loadGoogleMaps } from "@/lib/loadGoogleMaps";
 
 interface Props {
   label: string;
@@ -10,25 +11,6 @@ interface Props {
   onValidated?: (valid: boolean) => void;
   placeholder?: string;
   showGeolocate?: boolean;
-}
-
-function loadGoogleMaps(): Promise<void> {
-  return new Promise((resolve) => {
-    if (window.google?.maps?.places) { resolve(); return; }
-    if (document.getElementById("google-maps-script")) {
-      const interval = setInterval(() => {
-        if (window.google?.maps?.places) { clearInterval(interval); resolve(); }
-      }, 200);
-      return;
-    }
-    const script = document.createElement("script");
-    script.id = "google-maps-script";
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&language=fr&region=RE`;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    document.head.appendChild(script);
-  });
 }
 
 export default function AddressAutocomplete({

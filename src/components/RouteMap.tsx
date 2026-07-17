@@ -1,30 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { loadGoogleMaps } from "@/lib/loadGoogleMaps";
 
 interface Props {
   origin: string;
   destination: string;
-}
-
-function loadGoogleMaps(): Promise<void> {
-  return new Promise((resolve) => {
-    if (window.google?.maps) { resolve(); return; }
-    const existing = document.getElementById("google-maps-script");
-    if (existing) {
-      const interval = setInterval(() => {
-        if (window.google?.maps) { clearInterval(interval); resolve(); }
-      }, 200);
-      return;
-    }
-    const script = document.createElement("script");
-    script.id = "google-maps-script";
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&language=fr&region=RE`;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    document.head.appendChild(script);
-  });
 }
 
 export default function RouteMap({ origin, destination }: Props) {
