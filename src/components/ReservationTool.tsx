@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { calculerPrix, type PrixResult } from "@/lib/pricing";
 import AddressAutocomplete from "./AddressAutocomplete";
+import RouteMap from "./RouteMap";
 
 /* ─── Types ─── */
 type Path = "standard" | "custom" | null;
@@ -161,6 +162,10 @@ export default function ReservationTool() {
   const [erreurPrix, setErreurPrix] = useState<string | null>(null);
   const [heureDepart, setHeureDepart] = useState(9);
   const [jourSemaine, setJourSemaine] = useState(new Date().getDay());
+  const [pickupValid, setPickupValid]           = useState(false);
+  const [destinationValid, setDestinationValid] = useState(false);
+  const [returnPickupValid, setReturnPickupValid]           = useState(false);
+  const [returnDestinationValid, setReturnDestinationValid] = useState(false);
 
   const set = (key: keyof FormData, val: unknown) =>
     setForm(f => ({ ...f, [key]: val }));
@@ -355,12 +360,15 @@ export default function ReservationTool() {
             label="Adresse de prise en charge"
             value={form.pickup}
             onChange={v => set("pickup", v)}
+            onValidated={setPickupValid}
             placeholder="Ex : Aéroport Roland Garros, Sainte-Marie"
+            showGeolocate
           />
           <AddressAutocomplete
             label="Destination"
             value={form.destination}
             onChange={v => set("destination", v)}
+            onValidated={setDestinationValid}
             placeholder="Ex : Hôtel Iloha, Saint-Leu"
           />
 
@@ -372,12 +380,15 @@ export default function ReservationTool() {
                   label="Adresse de prise en charge (retour)"
                   value={form.returnPickup}
                   onChange={v => set("returnPickup", v)}
+                  onValidated={setReturnPickupValid}
                   placeholder="Ex : Hôtel Iloha, Saint-Leu"
+                  showGeolocate
                 />
                 <AddressAutocomplete
                   label="Destination (retour)"
                   value={form.returnDestination}
                   onChange={v => set("returnDestination", v)}
+                  onValidated={setReturnDestinationValid}
                   placeholder="Ex : Aéroport Roland Garros"
                 />
               </div>
@@ -385,10 +396,18 @@ export default function ReservationTool() {
           )}
         </div>
 
+        {(!pickupValid || !destinationValid) && (form.pickup || form.destination) && (
+          <p className="text-xs text-[#091424]/40 mt-4 text-center">
+            Veuillez sélectionner les adresses dans la liste de suggestions
+          </p>
+        )}
         <NavButtons
           onBack={back}
           onNext={next}
-          nextDisabled={!form.pickup || !form.destination}
+          nextDisabled={
+            !pickupValid || !destinationValid ||
+            (form.tripType === "AR" && (!returnPickupValid || !returnDestinationValid))
+          }
         />
       </div>
     </div>
@@ -418,6 +437,9 @@ export default function ReservationTool() {
             </div>
           </div>
         </div>
+
+        {/* Carte itinéraire */}
+        <RouteMap origin={form.pickup} destination={form.destination} />
 
         {/* Heure de départ */}
         <div className="flex flex-col gap-1.5 mb-6">
