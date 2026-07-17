@@ -23,7 +23,7 @@ function resoudreCanonique(adresse: string): string {
   const n = normalise(adresse);
   for (const [canonique, aliases] of Object.entries(ALIAS_LIEUX)) {
     if (aliases.some(a => n.includes(normalise(a)))) {
-      return canonique;
+      return normalise(canonique); // normalise pour aligner avec normalise(t.de)
     }
   }
   return n;
