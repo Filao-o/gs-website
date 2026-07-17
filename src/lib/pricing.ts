@@ -6,6 +6,7 @@ import {
   MAJORATIONS_ZONE,
   MOTS_CLES_HAUTS,
   SUPPLEMENTS,
+  ALIAS_LIEUX,
 } from "./pricing.config";
 
 function normalise(str: string): string {
@@ -17,16 +18,27 @@ function normalise(str: string): string {
     .trim();
 }
 
+// Résout un nom canonique depuis une adresse Google Places complète
+function resoudreCanonique(adresse: string): string {
+  const n = normalise(adresse);
+  for (const [canonique, aliases] of Object.entries(ALIAS_LIEUX)) {
+    if (aliases.some(a => n.includes(normalise(a)))) {
+      return canonique;
+    }
+  }
+  return n;
+}
+
 function detecterZone(adresse: string): "hauts" | "bords" {
   const n = normalise(adresse);
   return MOTS_CLES_HAUTS.some((m) => n.includes(normalise(m))) ? "hauts" : "bords";
 }
 
 function tarifKmParTrajet(depart: string, destination: string): number | null {
-  const d = normalise(depart);
-  const v = normalise(destination);
+  const d = resoudreCanonique(depart);
+  const v = resoudreCanonique(destination);
   for (const t of TARIFS_KM_PAR_TRAJET) {
-    if (d.includes(normalise(t.de)) && v.includes(normalise(t.vers))) {
+    if (d === normalise(t.de) && v === normalise(t.vers)) {
       return t.prix_par_km;
     }
   }

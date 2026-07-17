@@ -28,12 +28,34 @@ export const MULTIPLICATEUR_AR = 2;
 
 
 // ─────────────────────────────────────────────
-//  3. TARIFS €/KM PAR TRAJET (trajets connus)
-//  Prix au kilomètre selon le départ et la destination.
+//  3. ALIAS DE LIEUX
+//  Mots-clés alternatifs pour matcher les adresses Google Places.
+//  Google retourne des adresses complètes ("Avenue Roland Garros, Sainte-Marie")
+//  donc on mappe plusieurs variantes vers un nom canonique.
+// ─────────────────────────────────────────────
+export const ALIAS_LIEUX: Record<string, string[]> = {
+  "aéroport":       ["roland garros", "aeroport", "aéroport", "roland-garros"],
+  "saint-denis":    ["saint-denis", "saint denis"],
+  "sainte-marie":   ["sainte-marie", "sainte marie"],
+  "sainte-clotilde":["sainte-clotilde", "sainte clotilde", "clotilde"],
+  "la possession":  ["la possession", "possession"],
+  "le port":        ["le port"],
+  "saint-paul":     ["saint-paul", "saint paul"],
+  "saint-gilles":   ["saint-gilles", "saint gilles", "saint-gilles-les-bains"],
+  "saint-leu":      ["saint-leu", "saint leu"],
+  "trois bassins":  ["trois bassins", "trois-bassins"],
+  "bois de nefles": ["bois de nefles", "bois-de-nefles", "bois de nèfles"],
+  "la montagne":    ["la montagne"],
+  "la bretagne":    ["la bretagne"],
+  "belle pierre":   ["belle pierre", "bellepierre"],
+  "pichette":       ["pichette"],
+  "dos d'ane":      ["dos d'ane", "dos dane", "dos-d'ane"],
+};
+
+// ─────────────────────────────────────────────
+//  4. TARIFS €/KM PAR TRAJET (trajets connus)
+//  Utilise les noms canoniques définis dans ALIAS_LIEUX.
 //  Priorité sur les paliers génériques.
-//
-//  Format : { de: "...", vers: "...", prix_par_km: X }
-//  Les mots-clés sont insensibles à la casse et aux accents.
 // ─────────────────────────────────────────────
 export const TARIFS_KM_PAR_TRAJET: {
   de: string;
@@ -42,29 +64,29 @@ export const TARIFS_KM_PAR_TRAJET: {
 }[] = [
 
   // ── Depuis Saint-Denis ──────────────────────
-  { de: "saint-denis", vers: "le port",                prix_par_km: 2.30 },
-  { de: "saint-denis", vers: "saint-paul",             prix_par_km: 2.20 },
-  { de: "saint-denis", vers: "la possession",          prix_par_km: 3.30 },
-  { de: "saint-denis", vers: "saint-gilles",           prix_par_km: 2.00 },
-  { de: "saint-denis", vers: "bois de nefles",         prix_par_km: 2.40 },
-  { de: "saint-denis", vers: "trois bassins",          prix_par_km: 2.00 },
+  { de: "saint-denis", vers: "le port",          prix_par_km: 2.30 },
+  { de: "saint-denis", vers: "saint-paul",        prix_par_km: 2.20 },
+  { de: "saint-denis", vers: "la possession",     prix_par_km: 3.30 },
+  { de: "saint-denis", vers: "saint-gilles",      prix_par_km: 2.00 },
+  { de: "saint-denis", vers: "bois de nefles",    prix_par_km: 2.40 },
+  { de: "saint-denis", vers: "trois bassins",     prix_par_km: 2.00 },
 
   // ── Depuis l'Aéroport Roland Garros ─────────
-  { de: "aéroport",    vers: "saint-denis",            prix_par_km: 3.80 },
-  { de: "aéroport",    vers: "sainte-clotilde",        prix_par_km: 3.80 },
-  { de: "aéroport",    vers: "sainte-marie",           prix_par_km: 3.30 },
-  { de: "aéroport",    vers: "la possession",          prix_par_km: 2.50 },
-  { de: "aéroport",    vers: "le port",                prix_par_km: 2.30 },
-  { de: "aéroport",    vers: "dos d'ane",              prix_par_km: 2.20 },
-  { de: "aéroport",    vers: "pichette",               prix_par_km: 2.40 },
-  { de: "aéroport",    vers: "bois de nefles",         prix_par_km: 2.08 },
-  { de: "aéroport",    vers: "saint-paul",             prix_par_km: 1.95 },
-  { de: "aéroport",    vers: "belle pierre",           prix_par_km: 3.50 },
-  { de: "aéroport",    vers: "la bretagne",            prix_par_km: 4.50 },
-  { de: "aéroport",    vers: "la montagne",            prix_par_km: 2.94 },
-  { de: "aéroport",    vers: "saint-gilles",           prix_par_km: 1.77 },
-  { de: "aéroport",    vers: "trois bassins",          prix_par_km: 1.70 },
-  { de: "aéroport",    vers: "saint-leu",              prix_par_km: 1.55 },
+  { de: "aéroport",    vers: "saint-denis",       prix_par_km: 3.80 },
+  { de: "aéroport",    vers: "sainte-clotilde",   prix_par_km: 3.80 },
+  { de: "aéroport",    vers: "sainte-marie",      prix_par_km: 3.30 },
+  { de: "aéroport",    vers: "la possession",     prix_par_km: 2.50 },
+  { de: "aéroport",    vers: "le port",           prix_par_km: 2.30 },
+  { de: "aéroport",    vers: "dos d'ane",         prix_par_km: 2.20 },
+  { de: "aéroport",    vers: "pichette",          prix_par_km: 2.40 },
+  { de: "aéroport",    vers: "bois de nefles",    prix_par_km: 2.08 },
+  { de: "aéroport",    vers: "saint-paul",        prix_par_km: 1.95 },
+  { de: "aéroport",    vers: "belle pierre",      prix_par_km: 3.50 },
+  { de: "aéroport",    vers: "la bretagne",       prix_par_km: 4.50 },
+  { de: "aéroport",    vers: "la montagne",       prix_par_km: 2.94 },
+  { de: "aéroport",    vers: "saint-gilles",      prix_par_km: 1.77 },
+  { de: "aéroport",    vers: "trois bassins",     prix_par_km: 1.70 },
+  { de: "aéroport",    vers: "saint-leu",         prix_par_km: 1.55 },
 
   // ⚠️ À compléter avec les autres trajets de Sébastien
 ];
