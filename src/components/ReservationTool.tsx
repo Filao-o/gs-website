@@ -6,6 +6,7 @@ import {
   Calendar, CheckCircle, Clock, Send, ChevronRight, Loader2
 } from "lucide-react";
 import { calculerPrix, type PrixResult } from "@/lib/pricing";
+import AddressAutocomplete from "./AddressAutocomplete";
 
 /* ─── Types ─── */
 type Path = "standard" | "custom" | null;
@@ -350,13 +351,13 @@ export default function ReservationTool() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <AddressInput
+          <AddressAutocomplete
             label="Adresse de prise en charge"
             value={form.pickup}
             onChange={v => set("pickup", v)}
             placeholder="Ex : Aéroport Roland Garros, Sainte-Marie"
           />
-          <AddressInput
+          <AddressAutocomplete
             label="Destination"
             value={form.destination}
             onChange={v => set("destination", v)}
@@ -364,25 +365,23 @@ export default function ReservationTool() {
           />
 
           {form.tripType === "AR" && (
-            <>
-              <div className="border-t border-[#091424]/8 pt-4 mt-1">
-                <p className="text-xs font-medium text-[#091424]/50 uppercase tracking-wide mb-4">Trajet retour</p>
-                <div className="flex flex-col gap-4">
-                  <AddressInput
-                    label="Adresse de prise en charge (retour)"
-                    value={form.returnPickup}
-                    onChange={v => set("returnPickup", v)}
-                    placeholder="Ex : Hôtel Iloha, Saint-Leu"
-                  />
-                  <AddressInput
-                    label="Destination (retour)"
-                    value={form.returnDestination}
-                    onChange={v => set("returnDestination", v)}
-                    placeholder="Ex : Aéroport Roland Garros"
-                  />
-                </div>
+            <div className="border-t border-[#091424]/8 pt-4 mt-1">
+              <p className="text-xs font-medium text-[#091424]/50 uppercase tracking-wide mb-4">Trajet retour</p>
+              <div className="flex flex-col gap-4">
+                <AddressAutocomplete
+                  label="Adresse de prise en charge (retour)"
+                  value={form.returnPickup}
+                  onChange={v => set("returnPickup", v)}
+                  placeholder="Ex : Hôtel Iloha, Saint-Leu"
+                />
+                <AddressAutocomplete
+                  label="Destination (retour)"
+                  value={form.returnDestination}
+                  onChange={v => set("returnDestination", v)}
+                  placeholder="Ex : Aéroport Roland Garros"
+                />
               </div>
-            </>
+            </div>
           )}
         </div>
 
