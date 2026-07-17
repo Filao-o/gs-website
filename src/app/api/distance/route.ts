@@ -27,7 +27,11 @@ export async function GET(req: NextRequest) {
 
   const element = data?.rows?.[0]?.elements?.[0];
   if (!element || element.status !== "OK") {
-    return NextResponse.json({ error: "Trajet introuvable" }, { status: 404 });
+    console.error("Google Maps error:", JSON.stringify(data));
+    return NextResponse.json(
+      { error: `Google Maps: ${data?.status ?? element?.status ?? "Erreur inconnue"}` },
+      { status: 404 }
+    );
   }
 
   return NextResponse.json({
