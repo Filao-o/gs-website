@@ -13,6 +13,8 @@ import RouteMap from "./RouteMap";
 type Path = "standard" | "custom" | null;
 type TripType = "AS" | "AR" | null;
 
+type Vehicle = "suv" | "van";
+
 interface FormData {
   path: Path;
   tripType: TripType;
@@ -20,6 +22,7 @@ interface FormData {
   lastName: string;
   phoneCountry: string;
   phone: string;
+  vehicle: Vehicle;
   pickup: string;
   destination: string;
   returnPickup: string;
@@ -38,6 +41,7 @@ const INITIAL: FormData = {
   lastName: "",
   phoneCountry: "+262",
   phone: "",
+  vehicle: "suv",
   pickup: "",
   destination: "",
   returnPickup: "",
@@ -49,18 +53,42 @@ const INITIAL: FormData = {
   customPhone: "",
 };
 
-/* ─── Mock slots ─── */
-const DAYS = ["Lun 21", "Mar 22", "Mer 23", "Jeu 24", "Ven 25", "Sam 26", "Dim 27"];
-const HOURS = ["05:00", "06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00"];
-const AVAILABLE: Record<string, string[]> = {
-  "Lun 21": ["05:00", "08:00", "14:00", "20:00"],
-  "Mar 22": ["06:00", "10:00", "16:00", "22:00"],
-  "Mer 23": ["05:00", "12:00", "18:00"],
-  "Jeu 24": ["08:00", "14:00", "20:00"],
-  "Ven 25": ["06:00", "10:00", "16:00"],
-  "Sam 26": ["05:00", "08:00", "12:00", "22:00"],
-  "Dim 27": ["10:00", "18:00"],
-};
+/* ─── Country dial codes ─── */
+const DIAL_CODES = [
+  { code: "+262", flag: "🇷🇪", label: "Réunion" },
+  { code: "+33",  flag: "🇫🇷", label: "France" },
+  { code: "+230", flag: "🇲🇺", label: "Maurice" },
+  { code: "+269", flag: "🇾🇹", label: "Mayotte" },
+  { code: "+261", flag: "🇲🇬", label: "Madagascar" },
+  { code: "+241", flag: "🇬🇦", label: "Gabon" },
+  { code: "+237", flag: "🇨🇲", label: "Cameroun" },
+  { code: "+221", flag: "🇸🇳", label: "Sénégal" },
+  { code: "+225", flag: "🇨🇮", label: "Côte d'Ivoire" },
+  { code: "+212", flag: "🇲🇦", label: "Maroc" },
+  { code: "+213", flag: "🇩🇿", label: "Algérie" },
+  { code: "+216", flag: "🇹🇳", label: "Tunisie" },
+  { code: "+44",  flag: "🇬🇧", label: "Royaume-Uni" },
+  { code: "+49",  flag: "🇩🇪", label: "Allemagne" },
+  { code: "+34",  flag: "🇪🇸", label: "Espagne" },
+  { code: "+39",  flag: "🇮🇹", label: "Italie" },
+  { code: "+31",  flag: "🇳🇱", label: "Pays-Bas" },
+  { code: "+32",  flag: "🇧🇪", label: "Belgique" },
+  { code: "+41",  flag: "🇨🇭", label: "Suisse" },
+  { code: "+351", flag: "🇵🇹", label: "Portugal" },
+  { code: "+352", flag: "🇱🇺", label: "Luxembourg" },
+  { code: "+1",   flag: "🇺🇸", label: "États-Unis / Canada" },
+  { code: "+61",  flag: "🇦🇺", label: "Australie" },
+  { code: "+81",  flag: "🇯🇵", label: "Japon" },
+  { code: "+82",  flag: "🇰🇷", label: "Corée du Sud" },
+  { code: "+86",  flag: "🇨🇳", label: "Chine" },
+  { code: "+91",  flag: "🇮🇳", label: "Inde" },
+  { code: "+971", flag: "🇦🇪", label: "Émirats Arabes Unis" },
+  { code: "+966", flag: "🇸🇦", label: "Arabie Saoudite" },
+  { code: "+27",  flag: "🇿🇦", label: "Afrique du Sud" },
+  { code: "+55",  flag: "🇧🇷", label: "Brésil" },
+  { code: "+52",  flag: "🇲🇽", label: "Mexique" },
+  { code: "+54",  flag: "🇦🇷", label: "Argentine" },
+];
 
 /* ─── Sub-components ─── */
 function StepHeader({ title, sub }: { title: string; sub?: string }) {
@@ -121,25 +149,6 @@ function Input({ label, value, onChange, placeholder, type = "text" }: {
   );
 }
 
-function AddressInput({ label, value, onChange, placeholder }: {
-  label: string; value: string; onChange: (v: string) => void; placeholder?: string;
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-medium text-[#091424]/60 uppercase tracking-wide">{label}</label>
-      <div className="relative">
-        <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#1FA3BA]" />
-        <input
-          type="text"
-          value={value}
-          onChange={e => onChange(e.target.value)}
-          placeholder={placeholder}
-          className="w-full bg-[#F5F4F0] border border-[#091424]/10 rounded-xl pl-9 pr-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all"
-        />
-      </div>
-    </div>
-  );
-}
 
 /* ─── Progress bar ─── */
 function Progress({ step, total }: { step: number; total: number }) {
@@ -156,7 +165,6 @@ function Progress({ step, total }: { step: number; total: number }) {
 export default function ReservationTool() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormData>(INITIAL);
-  const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [customSent, setCustomSent] = useState(false);
   const [prix, setPrix] = useState<PrixResult | null>(null);
@@ -207,7 +215,7 @@ export default function ReservationTool() {
   };
 
   useEffect(() => {
-    if (step === 4) calculerDistance();
+    if (step === 5) calculerDistance();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
@@ -323,16 +331,9 @@ export default function ReservationTool() {
                   onChange={e => set("phoneCountry", e.target.value)}
                   className="bg-[#F5F4F0] border border-[#091424]/10 rounded-xl pl-8 pr-3 py-3 text-sm text-[#091424] focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all appearance-none cursor-pointer"
                 >
-                  <option value="+262">🇷🇪 +262</option>
-                  <option value="+33">🇫🇷 +33</option>
-                  <option value="+230">🇲🇺 +230</option>
-                  <option value="+269">🇾🇹 +269</option>
-                  <option value="+261">🇲🇬 +261</option>
-                  <option value="+44">🇬🇧 +44</option>
-                  <option value="+49">🇩🇪 +49</option>
-                  <option value="+34">🇪🇸 +34</option>
-                  <option value="+39">🇮🇹 +39</option>
-                  <option value="+1">🇺🇸 +1</option>
+                  {DIAL_CODES.map(d => (
+                    <option key={d.code} value={d.code}>{d.flag} {d.code}</option>
+                  ))}
                 </select>
               </div>
               <input
@@ -360,29 +361,84 @@ export default function ReservationTool() {
     </div>
   );
 
-  /* ── STEP 3 — Trajet + Véhicule ── */
+  /* ── STEP 3 — Véhicule ── */
   if (step === 3) return (
     <div className="max-w-2xl mx-auto">
       <div className="bg-white rounded-3xl p-8 lg:p-12 shadow-sm border border-[#091424]/5">
         <Progress step={3} total={5} />
-        <StepHeader title="Votre trajet" sub="Renseignez les adresses de prise en charge et de destination." />
-
-        {/* Véhicule */}
-        <div className="flex items-center gap-4 bg-[#091424] rounded-2xl px-5 py-4 mb-6">
-          <div className="w-10 h-10 bg-[#1FA3BA]/20 rounded-xl flex items-center justify-center shrink-0">
-            <Car size={18} className="text-[#1FA3BA]" />
-          </div>
-          <div>
-            <p className="text-white font-medium text-sm">SUV Premium — GS Transport</p>
-            <p className="text-white/50 text-xs mt-0.5">4 passagers · Climatisée · Bagages inclus</p>
-          </div>
-          <div className="ml-auto flex items-center gap-1">
-            <span className="text-[#1FA3BA] font-bold text-sm">5★</span>
-            <span className="text-white/40 text-xs">+50 avis</span>
-          </div>
-        </div>
+        <StepHeader title="Votre véhicule" sub="Choisissez le véhicule adapté à votre trajet." />
 
         <div className="flex flex-col gap-4">
+          {[
+            {
+              val: "suv" as Vehicle,
+              name: "SUV Premium",
+              specs: "4 passagers · Climatisé · Bagages inclus",
+              badge: "Le plus demandé",
+            },
+            {
+              val: "van" as Vehicle,
+              name: "Van Premium",
+              specs: "8 passagers · Climatisé · Grand coffre",
+              badge: "Groupes & familles",
+            },
+          ].map(v => (
+            <button
+              key={v.val}
+              onClick={() => set("vehicle", v.val)}
+              className={`text-left flex items-center gap-5 rounded-2xl p-5 border-2 transition-all ${
+                form.vehicle === v.val
+                  ? "border-[#1FA3BA] bg-[#1FA3BA]/5"
+                  : "border-[#091424]/8 bg-[#F5F4F0] hover:border-[#1FA3BA]/40"
+              }`}
+            >
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                form.vehicle === v.val ? "bg-[#1FA3BA]/15" : "bg-[#091424]/6"
+              }`}>
+                <Car size={22} className={form.vehicle === v.val ? "text-[#1FA3BA]" : "text-[#091424]/60"} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <p className="font-semibold text-[#091424] text-sm">{v.name} — GS Transport</p>
+                  <span className="text-[10px] font-medium bg-[#1FA3BA]/10 text-[#1FA3BA] px-2 py-0.5 rounded-full shrink-0">{v.badge}</span>
+                </div>
+                <p className="text-[#091424]/50 text-xs">{v.specs}</p>
+                <p className="text-[#1FA3BA] font-medium text-xs mt-1">5★ · +50 avis vérifiés</p>
+              </div>
+              {form.vehicle === v.val && (
+                <CheckCircle size={20} className="text-[#1FA3BA] shrink-0" />
+              )}
+            </button>
+          ))}
+        </div>
+
+        <NavButtons onBack={back} onNext={next} />
+      </div>
+    </div>
+  );
+
+  /* ── STEP 4 — Trajet : adresses + map + date/heure ── */
+  if (step === 4) return (
+    <div className="max-w-2xl mx-auto">
+      <div className="bg-white rounded-3xl p-8 lg:p-12 shadow-sm border border-[#091424]/5">
+        <Progress step={4} total={5} />
+        <StepHeader title="Votre trajet" sub="Renseignez les adresses de prise en charge et de destination." />
+
+        {/* Résumé véhicule */}
+        <div className="flex items-center gap-4 bg-[#091424] rounded-2xl px-5 py-3.5 mb-6">
+          <div className="w-8 h-8 bg-[#1FA3BA]/20 rounded-lg flex items-center justify-center shrink-0">
+            <Car size={16} className="text-[#1FA3BA]" />
+          </div>
+          <p className="text-white/80 text-sm">
+            {form.vehicle === "suv" ? "SUV Premium — 4 passagers" : "Van Premium — 8 passagers"}
+          </p>
+          <button onClick={back} className="ml-auto text-[#1FA3BA] text-xs hover:text-[#1FA3BA]/70 transition-colors shrink-0">
+            Changer
+          </button>
+        </div>
+
+        {/* Adresses */}
+        <div className="flex flex-col gap-4 mb-6">
           <AddressAutocomplete
             label="Adresse de prise en charge"
             value={form.pickup}
@@ -404,7 +460,7 @@ export default function ReservationTool() {
               <p className="text-xs font-medium text-[#091424]/50 uppercase tracking-wide mb-4">Trajet retour</p>
               <div className="flex flex-col gap-4">
                 <AddressAutocomplete
-                  label="Adresse de prise en charge (retour)"
+                  label="Prise en charge (retour)"
                   value={form.returnPickup}
                   onChange={v => set("returnPickup", v)}
                   onValidated={setReturnPickupValid}
@@ -423,53 +479,15 @@ export default function ReservationTool() {
           )}
         </div>
 
-        {(!pickupValid || !destinationValid) && (form.pickup || form.destination) && (
-          <p className="text-xs text-[#091424]/40 mt-4 text-center">
-            Veuillez sélectionner les adresses dans la liste de suggestions
-          </p>
+        {/* Carte itinéraire — s'affiche dès que les deux adresses sont validées */}
+        {pickupValid && destinationValid && (
+          <div className="mb-6">
+            <RouteMap origin={form.pickup} destination={form.destination} />
+          </div>
         )}
-        <NavButtons
-          onBack={back}
-          onNext={next}
-          nextDisabled={
-            !pickupValid || !destinationValid ||
-            (form.tripType === "AR" && (!returnPickupValid || !returnDestinationValid))
-          }
-        />
-      </div>
-    </div>
-  );
-
-  /* ── STEP 4 — Prix estimé ── */
-  if (step === 4) return (
-    <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-3xl p-8 lg:p-12 shadow-sm border border-[#091424]/5">
-        <Progress step={4} total={5} />
-        <StepHeader title="Estimation du tarif" sub="Prix calculé selon la distance réelle. Paiement à bord." />
-
-        {/* Résumé trajet */}
-        <div className="bg-[#F5F4F0] rounded-2xl p-5 mb-6 flex flex-col gap-3">
-          <div className="flex items-start gap-3">
-            <div className="w-2 h-2 rounded-full bg-[#1FA3BA] mt-1.5 shrink-0" />
-            <div>
-              <p className="text-xs text-[#091424]/40 uppercase tracking-wide">Départ</p>
-              <p className="text-sm text-[#091424] font-medium">{form.pickup}</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <div className="w-2 h-2 rounded-full bg-[#091424] mt-1.5 shrink-0" />
-            <div>
-              <p className="text-xs text-[#091424]/40 uppercase tracking-wide">Arrivée</p>
-              <p className="text-sm text-[#091424] font-medium">{form.destination}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Carte itinéraire */}
-        <RouteMap origin={form.pickup} destination={form.destination} />
 
         {/* Date & heure de départ */}
-        <div className="flex flex-col gap-3 mb-6">
+        <div className="flex flex-col gap-3 mb-2">
           <label className="text-xs font-medium text-[#091424]/60 uppercase tracking-wide">
             Date et heure de départ
           </label>
@@ -494,94 +512,33 @@ export default function ReservationTool() {
               />
             </div>
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 mt-1">
             {(heureDepart >= 22 || heureDepart < 5) && (
               <p className="flex items-center gap-1.5 text-xs text-[#1FA3BA]">
-                <Clock size={12} /> Majoration nuit +25% appliquée
+                <Clock size={12} /> Majoration nuit +25% sera appliquée
               </p>
             )}
             {jourSemaine === 0 && (
               <p className="flex items-center gap-1.5 text-xs text-[#1FA3BA]">
-                <Calendar size={12} /> Supplément dimanche +10€ appliqué
+                <Calendar size={12} /> Supplément dimanche +10€ sera appliqué
               </p>
             )}
           </div>
         </div>
 
-        {/* Recalculer si date/heure changé */}
-        <button
-          onClick={calculerDistance}
-          className="w-full mb-4 py-2 text-xs text-[#1FA3BA] border border-[#1FA3BA]/20 rounded-xl hover:bg-[#1FA3BA]/5 transition-all"
-        >
-          Recalculer le prix
-        </button>
-
-        {/* Prix */}
-        {loadingPrix && (
-          <div className="bg-[#091424] rounded-2xl p-8 mb-4 text-center">
-            <Loader2 size={28} className="text-white/40 mx-auto animate-spin" />
-            <p className="text-white/40 text-xs mt-3">Calcul de la distance en cours…</p>
-          </div>
-        )}
-
-        {erreurPrix && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mb-4 text-center">
-            <p className="text-red-600 text-sm">{erreurPrix}</p>
-            <button onClick={calculerDistance} className="text-xs text-red-400 mt-2 underline">Réessayer</button>
-          </div>
-        )}
-
-        {prix && !loadingPrix && (
-          <div className="bg-[#091424] rounded-2xl p-6 mb-4">
-            <div className="flex items-end justify-between mb-4">
-              <div>
-                <p className="text-white/50 text-xs uppercase tracking-widest mb-1">Estimation</p>
-                <p className="font-heading text-white text-5xl font-light">{prix.prixFinal} €</p>
-              </div>
-              <div className="text-right">
-                <p className="text-white/40 text-xs">{prix.distanceKm} km</p>
-                <p className="text-white/40 text-xs">{prix.dureeMin} min</p>
-                <p className="text-white/40 text-xs">{prix.prixParKm} €/km</p>
-              </div>
-            </div>
-
-            {/* Détail */}
-            <div className="border-t border-white/10 pt-4 flex flex-col gap-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-white/50">Base ({form.tripType === "AR" ? "aller-retour" : "aller simple"})</span>
-                <span className="text-white">{prix.prixBase} €</span>
-              </div>
-              {prix.majoration && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-white/50">{prix.majoration}</span>
-                  <span className="text-[#1FA3BA]">inclus</span>
-                </div>
-              )}
-              {prix.supplements.map(s => (
-                <div key={s.label} className="flex justify-between text-sm">
-                  <span className="text-white/50">{s.label}</span>
-                  <span className="text-[#1FA3BA]">+{s.montant} €</span>
-                </div>
-              ))}
-              <div className="flex justify-between text-sm font-medium border-t border-white/10 pt-2 mt-1">
-                <span className="text-white">Total</span>
-                <span className="text-[#1FA3BA] text-base">{prix.prixFinal} €</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="flex items-center gap-3 bg-[#1FA3BA]/8 border border-[#1FA3BA]/20 rounded-xl px-4 py-3">
-          <CheckCircle size={15} className="text-[#1FA3BA] shrink-0" />
-          <p className="text-sm text-[#091424]/70">Le paiement s'effectue directement auprès du chauffeur à bord du véhicule.</p>
-        </div>
-
-        <NavButtons onBack={back} onNext={next} nextDisabled={!prix} />
+        <NavButtons
+          onBack={back}
+          onNext={next}
+          nextDisabled={
+            !pickupValid || !destinationValid ||
+            (form.tripType === "AR" && (!returnPickupValid || !returnDestinationValid))
+          }
+        />
       </div>
     </div>
   );
 
-  /* ── STEP 5 — Créneaux ── */
+  /* ── STEP 5 — Estimation du tarif ── */
   if (step === 5) {
     if (confirmed) return (
       <div className="max-w-2xl mx-auto">
@@ -590,10 +547,10 @@ export default function ReservationTool() {
             <CheckCircle size={30} className="text-[#1FA3BA]" />
           </div>
           <h3 className="font-heading text-[#091424] text-2xl lg:text-3xl font-light mb-3">
-            Réservation confirmée !
+            Demande envoyée !
           </h3>
           <p className="text-[#091424]/50 text-sm leading-relaxed max-w-sm mx-auto mb-8">
-            Sébastien a bien reçu votre demande. Vous recevrez une confirmation par SMS au <span className="text-[#091424] font-medium">{form.phone}</span> dans les 15 minutes.
+            Sébastien va vous contacter au <span className="text-[#091424] font-medium">{form.phoneCountry} {form.phone}</span> pour confirmer votre réservation.
           </p>
           <div className="bg-[#F5F4F0] rounded-2xl p-5 text-left flex flex-col gap-3 mb-8">
             <div className="flex justify-between text-sm">
@@ -601,19 +558,25 @@ export default function ReservationTool() {
               <span className="text-[#091424] font-medium">{form.firstName} {form.lastName}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-[#091424]/50">Créneau</span>
-              <span className="text-[#091424] font-medium">{form.slot}</span>
+              <span className="text-[#091424]/50">Date</span>
+              <span className="text-[#091424] font-medium">{departDatetime.date} à {departDatetime.time}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-[#091424]/50">Véhicule</span>
+              <span className="text-[#091424] font-medium">{form.vehicle === "suv" ? "SUV Premium" : "Van Premium"}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-[#091424]/50">Trajet</span>
               <span className="text-[#091424] font-medium">{form.tripType === "AR" ? "Aller-retour" : "Aller simple"}</span>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-[#091424]/50">Paiement</span>
-              <span className="text-[#091424] font-medium">À bord</span>
-            </div>
+            {prix && (
+              <div className="flex justify-between text-sm border-t border-[#091424]/8 pt-3 mt-1">
+                <span className="text-[#091424]/50">Estimation</span>
+                <span className="text-[#1FA3BA] font-semibold">{prix.prixFinal} €</span>
+              </div>
+            )}
           </div>
-          <button onClick={() => { setStep(0); setForm(INITIAL); setConfirmed(false); setSelectedDay(null); }}
+          <button onClick={() => { setStep(0); setForm(INITIAL); setConfirmed(false); setPrix(null); }}
             className="text-[#091424]/40 hover:text-[#091424] text-sm transition-colors">
             Faire une nouvelle réservation
           </button>
@@ -621,101 +584,96 @@ export default function ReservationTool() {
       </div>
     );
 
-    if (form.noDate) return (
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-3xl p-8 lg:p-14 shadow-sm border border-[#091424]/5 text-center">
-          <div className="w-16 h-16 bg-[#091424]/5 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Clock size={28} className="text-[#091424]/40" />
-          </div>
-          <h3 className="font-heading text-[#091424] text-2xl font-light mb-3">
-            Pas de problème
-          </h3>
-          <p className="text-[#091424]/50 text-sm leading-relaxed max-w-sm mx-auto mb-6">
-            Sébastien vous contactera au <span className="text-[#091424] font-medium">{form.phone}</span> pour convenir d'un créneau ensemble.
-            <br /><br />
-            <span className="text-[#091424]/70">Il est recommandé de réserver au minimum <strong className="text-[#091424]">24h à l'avance</strong> pour garantir la disponibilité.</span>
-          </p>
-          <a href="tel:+262693512282"
-            className="inline-flex items-center gap-2 bg-[#091424] text-white text-sm font-medium px-6 py-3 rounded-full hover:bg-[#091424]/85 transition-all">
-            <Phone size={14} /> Appeler Sébastien
-          </a>
-          <div className="mt-6">
-            <button onClick={() => { setStep(0); setForm(INITIAL); setConfirmed(false); }}
-              className="text-[#091424]/40 hover:text-[#091424] text-sm transition-colors">
-              Retour à l'accueil
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-
     return (
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-2xl mx-auto">
         <div className="bg-white rounded-3xl p-8 lg:p-12 shadow-sm border border-[#091424]/5">
           <Progress step={5} total={5} />
-          <StepHeader title="Choisissez votre créneau" sub="Sélectionnez le jour et l'heure qui vous convient." />
+          <StepHeader title="Estimation du tarif" sub="Prix calculé selon la distance réelle. Paiement à bord." />
 
-          {/* Day selector */}
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none mb-6">
-            {DAYS.map(d => (
-              <button
-                key={d}
-                onClick={() => { setSelectedDay(d); set("slot", null); }}
-                className={`shrink-0 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border ${
-                  selectedDay === d
-                    ? "bg-[#091424] text-white border-[#091424]"
-                    : "bg-[#F5F4F0] text-[#091424]/60 border-[#091424]/8 hover:border-[#091424]/20"
-                }`}
-              >
-                {d}
-              </button>
-            ))}
-          </div>
-
-          {/* Hours */}
-          {selectedDay ? (
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-6">
-              {HOURS.map(h => {
-                const avail = AVAILABLE[selectedDay]?.includes(h);
-                const selected = form.slot === `${selectedDay} · ${h}`;
-                return (
-                  <button
-                    key={h}
-                    disabled={!avail}
-                    onClick={() => set("slot", `${selectedDay} · ${h}`)}
-                    className={`py-2.5 rounded-xl text-sm font-medium transition-all border ${
-                      !avail
-                        ? "bg-[#F5F4F0]/50 text-[#091424]/20 border-transparent cursor-not-allowed"
-                        : selected
-                        ? "bg-[#1FA3BA] text-white border-[#1FA3BA]"
-                        : "bg-[#F5F4F0] text-[#091424] border-[#091424]/8 hover:border-[#1FA3BA]/40"
-                    }`}
-                  >
-                    {h}
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="bg-[#F5F4F0] rounded-2xl py-10 text-center mb-6">
-              <Calendar size={24} className="text-[#091424]/20 mx-auto mb-2" />
-              <p className="text-[#091424]/40 text-sm">Sélectionnez un jour</p>
+          {/* Loading */}
+          {loadingPrix && (
+            <div className="bg-[#091424] rounded-2xl p-10 mb-6 text-center">
+              <Loader2 size={32} className="text-white/40 mx-auto animate-spin" />
+              <p className="text-white/40 text-xs mt-3">Calcul de la distance en cours…</p>
             </div>
           )}
 
-          {/* No date option */}
-          <button
-            onClick={() => set("noDate", true)}
-            className="w-full flex items-center justify-center gap-2 border border-dashed border-[#091424]/20 rounded-xl py-3 text-sm text-[#091424]/50 hover:text-[#091424] hover:border-[#091424]/40 transition-all mb-2"
-          >
-            <Clock size={14} /> Je ne connais pas encore mes dates
-          </button>
+          {/* Erreur */}
+          {erreurPrix && !loadingPrix && (
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mb-6 text-center">
+              <p className="text-red-600 text-sm">{erreurPrix}</p>
+              <button onClick={calculerDistance} className="text-xs text-red-400 mt-2 underline">Réessayer</button>
+            </div>
+          )}
+
+          {/* Prix */}
+          {prix && !loadingPrix && (
+            <div className="bg-[#091424] rounded-2xl p-6 mb-6">
+              <div className="flex items-end justify-between mb-4">
+                <div>
+                  <p className="text-white/50 text-xs uppercase tracking-widest mb-1">Estimation</p>
+                  <p className="font-heading text-white text-5xl font-light">{prix.prixFinal} €</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-white/40 text-xs">{prix.distanceKm} km</p>
+                  <p className="text-white/40 text-xs">{prix.dureeMin} min</p>
+                  <p className="text-white/40 text-xs">{prix.prixParKm} €/km</p>
+                </div>
+              </div>
+              <div className="border-t border-white/10 pt-4 flex flex-col gap-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-white/50">Base ({form.tripType === "AR" ? "aller-retour" : "aller simple"})</span>
+                  <span className="text-white">{prix.prixBase} €</span>
+                </div>
+                {prix.majoration && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/50">{prix.majoration}</span>
+                    <span className="text-[#1FA3BA]">inclus</span>
+                  </div>
+                )}
+                {prix.supplements.map(s => (
+                  <div key={s.label} className="flex justify-between text-sm">
+                    <span className="text-white/50">{s.label}</span>
+                    <span className="text-[#1FA3BA]">+{s.montant} €</span>
+                  </div>
+                ))}
+                <div className="flex justify-between text-sm font-medium border-t border-white/10 pt-2 mt-1">
+                  <span className="text-white">Total</span>
+                  <span className="text-[#1FA3BA] text-base">{prix.prixFinal} €</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Résumé trajet */}
+          {prix && !loadingPrix && (
+            <div className="bg-[#F5F4F0] rounded-2xl p-4 mb-6 flex flex-col gap-2.5">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-[#1FA3BA] shrink-0" />
+                <p className="text-sm text-[#091424]">{form.pickup}</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-[#091424] shrink-0" />
+                <p className="text-sm text-[#091424]">{form.destination}</p>
+              </div>
+              <div className="border-t border-[#091424]/8 pt-2.5 flex flex-wrap gap-x-6 gap-y-1">
+                <span className="text-xs text-[#091424]/50">{departDatetime.date} · {departDatetime.time}</span>
+                <span className="text-xs text-[#091424]/50">{form.vehicle === "suv" ? "SUV 4 places" : "Van 8 places"}</span>
+                <span className="text-xs text-[#091424]/50">{form.tripType === "AR" ? "Aller-retour" : "Aller simple"}</span>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center gap-3 bg-[#1FA3BA]/8 border border-[#1FA3BA]/20 rounded-xl px-4 py-3 mb-2">
+            <CheckCircle size={15} className="text-[#1FA3BA] shrink-0" />
+            <p className="text-sm text-[#091424]/70">Le paiement s'effectue directement auprès du chauffeur à bord du véhicule.</p>
+          </div>
 
           <NavButtons
             onBack={back}
             onNext={() => setConfirmed(true)}
-            nextLabel="Confirmer la réservation"
-            nextDisabled={!form.slot}
+            nextLabel="Envoyer ma demande"
+            nextDisabled={!prix || loadingPrix}
           />
         </div>
       </div>
