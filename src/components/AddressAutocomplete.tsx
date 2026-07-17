@@ -36,7 +36,6 @@ export default function AddressAutocomplete({
     acRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
       componentRestrictions: { country: "re" },
       fields: ["formatted_address", "name", "geometry"],
-      types: ["address", "establishment"],
     });
 
     acRef.current.addListener("place_changed", () => {
