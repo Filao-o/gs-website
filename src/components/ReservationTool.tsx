@@ -18,6 +18,7 @@ interface FormData {
   tripType: TripType;
   firstName: string;
   lastName: string;
+  phoneCountry: string;
   phone: string;
   pickup: string;
   destination: string;
@@ -35,6 +36,7 @@ const INITIAL: FormData = {
   tripType: null,
   firstName: "",
   lastName: "",
+  phoneCountry: "+262",
   phone: "",
   pickup: "",
   destination: "",
@@ -160,8 +162,10 @@ export default function ReservationTool() {
   const [prix, setPrix] = useState<PrixResult | null>(null);
   const [loadingPrix, setLoadingPrix] = useState(false);
   const [erreurPrix, setErreurPrix] = useState<string | null>(null);
-  const [heureDepart, setHeureDepart] = useState(9);
-  const [jourSemaine, setJourSemaine] = useState(new Date().getDay());
+  const todayStr = new Date().toISOString().split("T")[0];
+  const [departDatetime, setDepartDatetime] = useState({ date: todayStr, time: "09:00" });
+  const heureDepart = parseInt(departDatetime.time.split(":")[0], 10);
+  const jourSemaine = new Date(`${departDatetime.date}T${departDatetime.time}`).getDay();
   const [pickupValid, setPickupValid]           = useState(false);
   const [destinationValid, setDestinationValid] = useState(false);
   const [returnPickupValid, setReturnPickupValid]           = useState(false);
@@ -311,14 +315,37 @@ export default function ReservationTool() {
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-medium text-[#091424]/60 uppercase tracking-wide">Téléphone</label>
-            <div className="relative">
-              <Phone size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#1FA3BA]" />
+            <div className="flex gap-2">
+              <div className="relative shrink-0">
+                <Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#1FA3BA] pointer-events-none" />
+                <select
+                  value={form.phoneCountry}
+                  onChange={e => set("phoneCountry", e.target.value)}
+                  className="bg-[#F5F4F0] border border-[#091424]/10 rounded-xl pl-8 pr-3 py-3 text-sm text-[#091424] focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all appearance-none cursor-pointer"
+                >
+                  <option value="+262">🇷🇪 +262</option>
+                  <option value="+33">🇫🇷 +33</option>
+                  <option value="+230">🇲🇺 +230</option>
+                  <option value="+269">🇾🇹 +269</option>
+                  <option value="+261">🇲🇬 +261</option>
+                  <option value="+44">🇬🇧 +44</option>
+                  <option value="+49">🇩🇪 +49</option>
+                  <option value="+34">🇪🇸 +34</option>
+                  <option value="+39">🇮🇹 +39</option>
+                  <option value="+1">🇺🇸 +1</option>
+                </select>
+              </div>
               <input
                 type="tel"
+                inputMode="numeric"
                 value={form.phone}
-                onChange={e => set("phone", e.target.value)}
-                placeholder="+262 6XX XX XX XX"
-                className="w-full bg-[#F5F4F0] border border-[#091424]/10 rounded-xl pl-9 pr-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all"
+                onChange={e => set("phone", e.target.value.replace(/[^0-9]/g, ""))}
+                onKeyDown={e => {
+                  const allowed = ["Backspace","Delete","ArrowLeft","ArrowRight","Tab","Enter"];
+                  if (!allowed.includes(e.key) && !/^[0-9]$/.test(e.key)) e.preventDefault();
+                }}
+                placeholder="0692 XX XX XX"
+                className="flex-1 bg-[#F5F4F0] border border-[#091424]/10 rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all"
               />
             </div>
           </div>
@@ -441,52 +468,47 @@ export default function ReservationTool() {
         {/* Carte itinéraire */}
         <RouteMap origin={form.pickup} destination={form.destination} />
 
-        {/* Heure de départ */}
-        <div className="flex flex-col gap-1.5 mb-6">
+        {/* Date & heure de départ */}
+        <div className="flex flex-col gap-3 mb-6">
           <label className="text-xs font-medium text-[#091424]/60 uppercase tracking-wide">
-            Heure de départ prévue
+            Date et heure de départ
           </label>
-          <div className="flex items-center gap-3">
-            <input
-              type="range"
-              min={0} max={23} step={1}
-              value={heureDepart}
-              onChange={e => setHeureDepart(Number(e.target.value))}
-              className="flex-1 accent-[#1FA3BA]"
-            />
-            <span className="text-[#091424] font-medium text-sm w-12 text-right">
-              {String(heureDepart).padStart(2, "0")}h00
-            </span>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-[#091424]/40">Date</span>
+              <input
+                type="date"
+                min={todayStr}
+                value={departDatetime.date}
+                onChange={e => setDepartDatetime(prev => ({ ...prev, date: e.target.value }))}
+                className="bg-[#F5F4F0] border border-[#091424]/10 rounded-xl px-4 py-3 text-sm text-[#091424] focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-[#091424]/40">Heure</span>
+              <input
+                type="time"
+                value={departDatetime.time}
+                onChange={e => setDepartDatetime(prev => ({ ...prev, time: e.target.value }))}
+                className="bg-[#F5F4F0] border border-[#091424]/10 rounded-xl px-4 py-3 text-sm text-[#091424] focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all"
+              />
+            </div>
           </div>
-          {(heureDepart >= 22 || heureDepart < 5) && (
-            <p className="text-xs text-[#1FA3BA]">Majoration nuit +25% appliquée</p>
-          )}
+          <div className="flex flex-col gap-1">
+            {(heureDepart >= 22 || heureDepart < 5) && (
+              <p className="flex items-center gap-1.5 text-xs text-[#1FA3BA]">
+                <Clock size={12} /> Majoration nuit +25% appliquée
+              </p>
+            )}
+            {jourSemaine === 0 && (
+              <p className="flex items-center gap-1.5 text-xs text-[#1FA3BA]">
+                <Calendar size={12} /> Supplément dimanche +10€ appliqué
+              </p>
+            )}
+          </div>
         </div>
 
-        {/* Jour */}
-        <div className="flex flex-col gap-1.5 mb-6">
-          <label className="text-xs font-medium text-[#091424]/60 uppercase tracking-wide">Jour de la course</label>
-          <div className="flex gap-1.5 flex-wrap">
-            {["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"].map((j, i) => (
-              <button
-                key={j}
-                onClick={() => setJourSemaine(i)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
-                  jourSemaine === i
-                    ? "bg-[#091424] text-white border-[#091424]"
-                    : "bg-[#F5F4F0] text-[#091424]/60 border-[#091424]/10 hover:border-[#091424]/30"
-                }`}
-              >
-                {j}
-              </button>
-            ))}
-          </div>
-          {jourSemaine === 0 && (
-            <p className="text-xs text-[#1FA3BA]">Supplément dimanche +10€ appliqué</p>
-          )}
-        </div>
-
-        {/* Recalculer si heure/jour changé */}
+        {/* Recalculer si date/heure changé */}
         <button
           onClick={calculerDistance}
           className="w-full mb-4 py-2 text-xs text-[#1FA3BA] border border-[#1FA3BA]/20 rounded-xl hover:bg-[#1FA3BA]/5 transition-all"
