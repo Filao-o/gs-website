@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  ArrowRight, ArrowLeft, Car, Phone, User, MapPin,
-  Calendar, CheckCircle, Clock, Send, ChevronRight
+  ArrowRight, ArrowLeft, Car, Phone, MapPin,
+  Calendar, CheckCircle, Clock, Send, ChevronRight, Loader2
 } from "lucide-react";
+import { calculerPrix, type PrixResult } from "@/lib/pricing";
 
 /* ─── Types ─── */
 type Path = "standard" | "custom" | null;
@@ -154,12 +155,51 @@ export default function ReservationTool() {
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [customSent, setCustomSent] = useState(false);
+  const [prix, setPrix] = useState<PrixResult | null>(null);
+  const [loadingPrix, setLoadingPrix] = useState(false);
+  const [erreurPrix, setErreurPrix] = useState<string | null>(null);
+  const [heureDepart, setHeureDepart] = useState(9);
+  const [jourSemaine, setJourSemaine] = useState(new Date().getDay());
 
   const set = (key: keyof FormData, val: unknown) =>
     setForm(f => ({ ...f, [key]: val }));
 
   const next = () => setStep(s => s + 1);
   const back = () => setStep(s => s - 1);
+
+  const calculerDistance = async () => {
+    setLoadingPrix(true);
+    setErreurPrix(null);
+    setPrix(null);
+    try {
+      const params = new URLSearchParams({
+        origine: form.pickup,
+        destination: form.destination,
+      });
+      const res  = await fetch(`/api/distance?${params}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Erreur calcul");
+      const result = calculerPrix(
+        form.pickup,
+        form.destination,
+        data.distanceKm,
+        data.dureeMin,
+        heureDepart,
+        jourSemaine,
+        form.tripType === "AR"
+      );
+      setPrix(result);
+    } catch (e: unknown) {
+      setErreurPrix(e instanceof Error ? e.message : "Erreur inconnue");
+    } finally {
+      setLoadingPrix(false);
+    }
+  };
+
+  useEffect(() => {
+    if (step === 4) calculerDistance();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   /* ── STEP 0 — Bienvenue ── */
   if (step === 0) return (
@@ -360,7 +400,7 @@ export default function ReservationTool() {
     <div className="max-w-2xl mx-auto">
       <div className="bg-white rounded-3xl p-8 lg:p-12 shadow-sm border border-[#091424]/5">
         <Progress step={4} total={5} />
-        <StepHeader title="Estimation du tarif" sub="Prix calculé selon la distance. Paiement à bord." />
+        <StepHeader title="Estimation du tarif" sub="Prix calculé selon la distance réelle. Paiement à bord." />
 
         {/* Résumé trajet */}
         <div className="bg-[#F5F4F0] rounded-2xl p-5 mb-6 flex flex-col gap-3">
@@ -380,19 +420,120 @@ export default function ReservationTool() {
           </div>
         </div>
 
-        {/* Prix — placeholder en attendant Google Maps */}
-        <div className="bg-[#091424] rounded-2xl p-6 mb-4 text-center">
-          <p className="text-white/50 text-xs uppercase tracking-widest mb-1">Estimation</p>
-          <p className="font-heading text-white text-5xl font-light">— €</p>
-          <p className="text-white/40 text-xs mt-2">Calcul Google Maps en cours d'intégration</p>
+        {/* Heure de départ */}
+        <div className="flex flex-col gap-1.5 mb-6">
+          <label className="text-xs font-medium text-[#091424]/60 uppercase tracking-wide">
+            Heure de départ prévue
+          </label>
+          <div className="flex items-center gap-3">
+            <input
+              type="range"
+              min={0} max={23} step={1}
+              value={heureDepart}
+              onChange={e => setHeureDepart(Number(e.target.value))}
+              className="flex-1 accent-[#1FA3BA]"
+            />
+            <span className="text-[#091424] font-medium text-sm w-12 text-right">
+              {String(heureDepart).padStart(2, "0")}h00
+            </span>
+          </div>
+          {(heureDepart >= 22 || heureDepart < 5) && (
+            <p className="text-xs text-[#1FA3BA]">Majoration nuit +25% appliquée</p>
+          )}
         </div>
+
+        {/* Jour */}
+        <div className="flex flex-col gap-1.5 mb-6">
+          <label className="text-xs font-medium text-[#091424]/60 uppercase tracking-wide">Jour de la course</label>
+          <div className="flex gap-1.5 flex-wrap">
+            {["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"].map((j, i) => (
+              <button
+                key={j}
+                onClick={() => setJourSemaine(i)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                  jourSemaine === i
+                    ? "bg-[#091424] text-white border-[#091424]"
+                    : "bg-[#F5F4F0] text-[#091424]/60 border-[#091424]/10 hover:border-[#091424]/30"
+                }`}
+              >
+                {j}
+              </button>
+            ))}
+          </div>
+          {jourSemaine === 0 && (
+            <p className="text-xs text-[#1FA3BA]">Supplément dimanche +10€ appliqué</p>
+          )}
+        </div>
+
+        {/* Recalculer si heure/jour changé */}
+        <button
+          onClick={calculerDistance}
+          className="w-full mb-4 py-2 text-xs text-[#1FA3BA] border border-[#1FA3BA]/20 rounded-xl hover:bg-[#1FA3BA]/5 transition-all"
+        >
+          Recalculer le prix
+        </button>
+
+        {/* Prix */}
+        {loadingPrix && (
+          <div className="bg-[#091424] rounded-2xl p-8 mb-4 text-center">
+            <Loader2 size={28} className="text-white/40 mx-auto animate-spin" />
+            <p className="text-white/40 text-xs mt-3">Calcul de la distance en cours…</p>
+          </div>
+        )}
+
+        {erreurPrix && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mb-4 text-center">
+            <p className="text-red-600 text-sm">{erreurPrix}</p>
+            <button onClick={calculerDistance} className="text-xs text-red-400 mt-2 underline">Réessayer</button>
+          </div>
+        )}
+
+        {prix && !loadingPrix && (
+          <div className="bg-[#091424] rounded-2xl p-6 mb-4">
+            <div className="flex items-end justify-between mb-4">
+              <div>
+                <p className="text-white/50 text-xs uppercase tracking-widest mb-1">Estimation</p>
+                <p className="font-heading text-white text-5xl font-light">{prix.prixFinal} €</p>
+              </div>
+              <div className="text-right">
+                <p className="text-white/40 text-xs">{prix.distanceKm} km</p>
+                <p className="text-white/40 text-xs">{prix.dureeMin} min</p>
+                <p className="text-white/40 text-xs">{prix.prixParKm} €/km</p>
+              </div>
+            </div>
+
+            {/* Détail */}
+            <div className="border-t border-white/10 pt-4 flex flex-col gap-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-white/50">Base ({form.tripType === "AR" ? "aller-retour" : "aller simple"})</span>
+                <span className="text-white">{prix.prixBase} €</span>
+              </div>
+              {prix.majoration && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-white/50">{prix.majoration}</span>
+                  <span className="text-[#1FA3BA]">inclus</span>
+                </div>
+              )}
+              {prix.supplements.map(s => (
+                <div key={s.label} className="flex justify-between text-sm">
+                  <span className="text-white/50">{s.label}</span>
+                  <span className="text-[#1FA3BA]">+{s.montant} €</span>
+                </div>
+              ))}
+              <div className="flex justify-between text-sm font-medium border-t border-white/10 pt-2 mt-1">
+                <span className="text-white">Total</span>
+                <span className="text-[#1FA3BA] text-base">{prix.prixFinal} €</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex items-center gap-3 bg-[#1FA3BA]/8 border border-[#1FA3BA]/20 rounded-xl px-4 py-3">
           <CheckCircle size={15} className="text-[#1FA3BA] shrink-0" />
           <p className="text-sm text-[#091424]/70">Le paiement s'effectue directement auprès du chauffeur à bord du véhicule.</p>
         </div>
 
-        <NavButtons onBack={back} onNext={next} />
+        <NavButtons onBack={back} onNext={next} nextDisabled={!prix} />
       </div>
     </div>
   );
