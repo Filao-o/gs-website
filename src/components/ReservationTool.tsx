@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ArrowRight, ArrowLeft, Car, Phone, MapPin,
   Calendar, CheckCircle, Clock, Send, ChevronRight, Loader2
@@ -157,6 +157,179 @@ function Progress({ step, total }: { step: number; total: number }) {
       {Array.from({ length: total }).map((_, i) => (
         <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-500 ${i < step ? "bg-[#1FA3BA]" : "bg-[#091424]/10"}`} />
       ))}
+    </div>
+  );
+}
+
+/* ─── DateTimePicker ─── */
+const JOURS_FR = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+const MOIS_FR  = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+
+function buildTimeSlots(): string[] {
+  const slots: string[] = [];
+  for (let h = 5; h < 24; h++) {
+    for (const m of [0, 15, 30, 45]) {
+      slots.push(`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`);
+    }
+  }
+  return slots;
+}
+const TIME_SLOTS = buildTimeSlots();
+
+function DateTimePicker({
+  value, onChange,
+}: {
+  value: { date: string; time: string };
+  onChange: (v: { date: string; time: string }) => void;
+}) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const [calYear,  setCalYear]  = useState(today.getFullYear());
+  const [calMonth, setCalMonth] = useState(today.getMonth());
+  const timeListRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to selected time on mount / time change
+  useEffect(() => {
+    const el = timeListRef.current?.querySelector("[data-selected=true]") as HTMLElement | null;
+    el?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [value.time]);
+
+  // Calendar grid
+  const firstDay = new Date(calYear, calMonth, 1);
+  // Monday = 0 offset
+  const startOffset = (firstDay.getDay() + 6) % 7;
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const cells: (number | null)[] = [
+    ...Array(startOffset).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ];
+
+  const isPast = (day: number) => {
+    const d = new Date(calYear, calMonth, day);
+    return d < today;
+  };
+
+  const isSelected = (day: number) => {
+    const iso = `${calYear}-${String(calMonth+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+    return iso === value.date;
+  };
+
+  const selectDay = (day: number) => {
+    if (isPast(day)) return;
+    const iso = `${calYear}-${String(calMonth+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+    onChange({ ...value, date: iso });
+  };
+
+  const prevMonth = () => {
+    if (calMonth === 0) { setCalYear(y => y - 1); setCalMonth(11); }
+    else setCalMonth(m => m - 1);
+  };
+  const nextMonth = () => {
+    if (calMonth === 11) { setCalYear(y => y + 1); setCalMonth(0); }
+    else setCalMonth(m => m + 1);
+  };
+
+  const canGoPrev = calYear > today.getFullYear() || calMonth > today.getMonth();
+
+  // Friendly label
+  const selectedLabel = (() => {
+    if (!value.date) return null;
+    const [y, mo, d] = value.date.split("-").map(Number);
+    const dt = new Date(y, mo - 1, d);
+    const dow = JOURS_FR[(dt.getDay() + 6) % 7];
+    return `${dow} ${d} ${MOIS_FR[mo - 1]} à ${value.time}`;
+  })();
+
+  return (
+    <div className="rounded-2xl border border-[#091424]/10 overflow-hidden bg-[#F5F4F0]">
+      <div className="flex divide-x divide-[#091424]/8" style={{ minHeight: 280 }}>
+
+        {/* Calendar */}
+        <div className="flex-1 p-4">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={prevMonth}
+              disabled={!canGoPrev}
+              className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[#091424]/6 transition-colors disabled:opacity-20"
+            >
+              <ArrowLeft size={14} className="text-[#091424]" />
+            </button>
+            <span className="text-sm font-medium text-[#091424]">
+              {MOIS_FR[calMonth]} {calYear}
+            </span>
+            <button
+              onClick={nextMonth}
+              className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[#091424]/6 transition-colors"
+            >
+              <ArrowRight size={14} className="text-[#091424]" />
+            </button>
+          </div>
+
+          {/* Day headers */}
+          <div className="grid grid-cols-7 mb-1">
+            {JOURS_FR.map(j => (
+              <div key={j} className="text-center text-[10px] font-medium text-[#091424]/40 py-1">{j}</div>
+            ))}
+          </div>
+
+          {/* Day cells */}
+          <div className="grid grid-cols-7 gap-y-0.5">
+            {cells.map((day, i) => {
+              if (!day) return <div key={`e-${i}`} />;
+              const past = isPast(day);
+              const sel  = isSelected(day);
+              return (
+                <button
+                  key={day}
+                  onClick={() => selectDay(day)}
+                  disabled={past}
+                  className={`aspect-square w-full max-w-[36px] mx-auto flex items-center justify-center rounded-full text-xs transition-all font-medium ${
+                    sel
+                      ? "bg-[#091424] text-white"
+                      : past
+                      ? "text-[#091424]/20 line-through cursor-not-allowed"
+                      : "text-[#091424] hover:bg-[#091424]/8"
+                  }`}
+                >
+                  {day}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Time slots */}
+        <div ref={timeListRef} className="w-28 overflow-y-auto" style={{ maxHeight: 280 }}>
+          {TIME_SLOTS.map(slot => {
+            const sel = slot === value.time;
+            return (
+              <button
+                key={slot}
+                data-selected={sel}
+                onClick={() => onChange({ ...value, time: slot })}
+                className={`w-full px-3 py-2.5 text-sm font-medium text-center transition-all ${
+                  sel
+                    ? "bg-white text-[#091424] shadow-sm"
+                    : "text-[#091424]/60 hover:bg-[#091424]/5 hover:text-[#091424]"
+                }`}
+              >
+                {slot}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Summary bar */}
+      {selectedLabel && (
+        <div className="border-t border-[#091424]/8 px-4 py-3 bg-white">
+          <p className="text-sm text-[#091424]/70">
+            Départ prévu le <span className="text-[#091424] font-medium">{selectedLabel}</span>
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -487,31 +660,11 @@ export default function ReservationTool() {
         )}
 
         {/* Date & heure de départ */}
-        <div className="flex flex-col gap-3 mb-2">
+        <div className="flex flex-col gap-2 mb-2">
           <label className="text-xs font-medium text-[#091424]/60 uppercase tracking-wide">
             Date et heure de départ
           </label>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-[#091424]/40">Date</span>
-              <input
-                type="date"
-                min={todayStr}
-                value={departDatetime.date}
-                onChange={e => setDepartDatetime(prev => ({ ...prev, date: e.target.value }))}
-                className="bg-[#F5F4F0] border border-[#091424]/10 rounded-xl px-4 py-3 text-sm text-[#091424] focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-[#091424]/40">Heure</span>
-              <input
-                type="time"
-                value={departDatetime.time}
-                onChange={e => setDepartDatetime(prev => ({ ...prev, time: e.target.value }))}
-                className="bg-[#F5F4F0] border border-[#091424]/10 rounded-xl px-4 py-3 text-sm text-[#091424] focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all"
-              />
-            </div>
-          </div>
+          <DateTimePicker value={departDatetime} onChange={setDepartDatetime} />
           <div className="flex flex-col gap-1 mt-1">
             {(heureDepart >= 22 || heureDepart < 5) && (
               <p className="flex items-center gap-1.5 text-xs text-[#1FA3BA]">
