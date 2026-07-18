@@ -559,7 +559,7 @@ export default function ReservationTool() {
         <Question text="Vous partez d'où ?" />
         <AddressAutocomplete key="pickup" label="" value={form.pickup} onChange={v => set("pickup", v)} onValidated={setPickupValid}
           placeholder="Ex : Aéroport Roland Garros, Sainte-Marie" showGeolocate />
-        <ContinueBtn disabled={!pickupValid} onClick={() => push("Vous partez d'où ?", form.pickup, "destination")} />
+        <ContinueBtn disabled={!pickupValid} onClick={() => push("Vous partez d'où ?", form.pickup, form.tripType === "AR" ? "datetime" : "destination")} />
       </>
     );
 
@@ -611,7 +611,7 @@ export default function ReservationTool() {
           {(heureDepart >= 22 || heureDepart < 5) && <p className="flex items-center gap-1.5 text-xs text-[#1FA3BA]"><Clock size={12} /> Majoration nuit +25% sera appliquée</p>}
           {jourSemaine === 0 && <p className="flex items-center gap-1.5 text-xs text-[#1FA3BA]"><Calendar size={12} /> Supplément dimanche +10€ sera appliqué</p>}
         </div>
-        <ContinueBtn onClick={() => push(form.tripType === "AR" ? "Pour quand est l'aller ?" : "Pour quand ?", `${departDatetime.date} à ${departDatetime.time}`, form.tripType === "AR" ? "retourDatetime" : "price")} />
+        <ContinueBtn onClick={() => push(form.tripType === "AR" ? "Pour quand est l'aller ?" : "Pour quand ?", `${departDatetime.date} à ${departDatetime.time}`, form.tripType === "AR" ? "destination" : "price")} />
       </>
     );
 
