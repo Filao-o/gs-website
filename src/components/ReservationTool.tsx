@@ -665,7 +665,6 @@ export default function ReservationTool() {
               <div className="text-right">
                 <p className="text-white/40 text-xs">{prix.distanceKm} km</p>
                 <p className="text-white/40 text-xs">{prix.dureeMin} min</p>
-                <p className="text-white/40 text-xs">{prix.prixParKm} €/km</p>
               </div>
             </div>
             <div className="border-t border-white/10 pt-4 flex flex-col gap-2">
