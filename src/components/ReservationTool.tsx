@@ -167,7 +167,7 @@ const MOIS_FR  = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Ao
 
 function buildTimeSlots(): string[] {
   const slots: string[] = [];
-  for (let h = 5; h < 24; h++) {
+  for (let h = 0; h < 24; h++) {
     for (const m of [0, 15, 30, 45]) {
       slots.push(`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`);
     }
@@ -345,12 +345,22 @@ export default function ReservationTool() {
   const [erreurPrix, setErreurPrix] = useState<string | null>(null);
   const todayStr = new Date().toISOString().split("T")[0];
   const [departDatetime, setDepartDatetime] = useState({ date: todayStr, time: "09:00" });
+  const [retourDatetime, setRetourDatetime] = useState({ date: todayStr, time: "12:00" });
   const heureDepart = parseInt(departDatetime.time.split(":")[0], 10);
   const jourSemaine = new Date(`${departDatetime.date}T${departDatetime.time}`).getDay();
-  const [pickupValid, setPickupValid]           = useState(false);
-  const [destinationValid, setDestinationValid] = useState(false);
-  const [returnPickupValid, setReturnPickupValid]           = useState(false);
+  const [returnDifferentPickup, setReturnDifferentPickup] = useState(false);
+  const [pickupValid, setPickupValid]                   = useState(false);
+  const [destinationValid, setDestinationValid]         = useState(false);
+  const [returnPickupValid, setReturnPickupValid]       = useState(false);
   const [returnDestinationValid, setReturnDestinationValid] = useState(false);
+
+  // Auto-fill destination retour avec la prise en charge aller quand elle est validée
+  useEffect(() => {
+    if (pickupValid && form.pickup && !form.returnDestination) {
+      set("returnDestination", form.pickup);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pickupValid, form.pickup]);
 
   const set = (key: keyof FormData, val: unknown) =>
     setForm(f => ({ ...f, [key]: val }));
@@ -598,15 +608,24 @@ export default function ReservationTool() {
         <StepHeader title="Votre trajet" sub="Renseignez les adresses de prise en charge et de destination." />
 
         {/* Résumé véhicule */}
-        <div className="flex items-center gap-4 bg-[#091424] rounded-2xl px-5 py-3.5 mb-6">
-          <div className="w-8 h-8 bg-[#1FA3BA]/20 rounded-lg flex items-center justify-center shrink-0">
-            <Car size={16} className="text-[#1FA3BA]" />
+        <div className="flex items-center gap-3 mb-6 flex-wrap">
+          <div className="flex items-center gap-2.5 bg-[#091424] text-white rounded-full pl-3 pr-4 py-2">
+            <div className="w-6 h-6 bg-[#1FA3BA]/25 rounded-full flex items-center justify-center shrink-0">
+              <Car size={13} className="text-[#1FA3BA]" />
+            </div>
+            <span className="text-sm font-medium">
+              {form.vehicle === "suv" ? "SUV Premium" : "Van Premium"}
+            </span>
+            <span className="text-white/40 text-xs">·</span>
+            <span className="text-white/60 text-xs">
+              {form.vehicle === "suv" ? "4 passagers" : "8 passagers"}
+            </span>
           </div>
-          <p className="text-white/80 text-sm">
-            {form.vehicle === "suv" ? "SUV Premium — 4 passagers" : "Van Premium — 8 passagers"}
-          </p>
-          <button onClick={back} className="ml-auto text-[#1FA3BA] text-xs hover:text-[#1FA3BA]/70 transition-colors shrink-0">
-            Changer
+          <button
+            onClick={back}
+            className="flex items-center gap-1.5 border border-[#091424]/15 text-[#091424]/50 hover:text-[#091424] hover:border-[#091424]/30 text-xs font-medium rounded-full px-3 py-2 transition-all"
+          >
+            Changer de véhicule
           </button>
         </div>
 
@@ -629,40 +648,58 @@ export default function ReservationTool() {
           />
 
           {form.tripType === "AR" && (
-            <div className="border-t border-[#091424]/8 pt-4 mt-1">
-              <p className="text-xs font-medium text-[#091424]/50 uppercase tracking-wide mb-4">Trajet retour</p>
-              <div className="flex flex-col gap-4">
+            <>
+              {/* Séparateur retour */}
+              <div className="flex items-center gap-3 pt-1">
+                <div className="flex-1 border-t border-dashed border-[#091424]/10" />
+                <span className="text-[10px] font-medium text-[#091424]/30 uppercase tracking-widest shrink-0">Retour</span>
+                <div className="flex-1 border-t border-dashed border-[#091424]/10" />
+              </div>
+
+              {/* Prise en charge retour — uniquement si différente */}
+              {returnDifferentPickup ? (
                 <AddressAutocomplete
-                  label="Prise en charge (retour)"
+                  label="Prise en charge retour"
                   value={form.returnPickup}
                   onChange={v => set("returnPickup", v)}
                   onValidated={setReturnPickupValid}
-                  placeholder="Ex : Hôtel Iloha, Saint-Leu"
+                  placeholder="Ex : Centre commercial, Saint-Paul"
                   showGeolocate
                 />
-                <AddressAutocomplete
-                  label="Destination (retour)"
-                  value={form.returnDestination}
-                  onChange={v => set("returnDestination", v)}
-                  onValidated={setReturnDestinationValid}
-                  placeholder="Ex : Aéroport Roland Garros"
-                />
-              </div>
-            </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setReturnDifferentPickup(true)}
+                  className="flex items-center gap-2 text-xs text-[#091424]/40 hover:text-[#1FA3BA] transition-colors self-start border border-dashed border-[#091424]/15 hover:border-[#1FA3BA]/30 rounded-lg px-3 py-2"
+                >
+                  <span className="text-base leading-none">+</span>
+                  La prise en charge du retour est différente de la destination
+                </button>
+              )}
+
+              {/* Destination retour — toujours affiché, pré-rempli avec pickup aller */}
+              <AddressAutocomplete
+                label="Destination retour"
+                value={form.returnDestination}
+                onChange={v => set("returnDestination", v)}
+                onValidated={setReturnDestinationValid}
+                placeholder="Ex : Adresse de départ"
+              />
+            </>
           )}
         </div>
 
-        {/* Carte itinéraire — s'affiche dès que les deux adresses sont validées */}
+        {/* Carte itinéraire */}
         {pickupValid && destinationValid && (
           <div className="mb-6">
             <RouteMap origin={form.pickup} destination={form.destination} />
           </div>
         )}
 
-        {/* Date & heure de départ */}
-        <div className="flex flex-col gap-2 mb-2">
+        {/* Date & heure — aller */}
+        <div className="flex flex-col gap-2 mb-4">
           <label className="text-xs font-medium text-[#091424]/60 uppercase tracking-wide">
-            Date et heure de départ
+            {form.tripType === "AR" ? "Date et heure — Aller" : "Date et heure de départ"}
           </label>
           <DateTimePicker value={departDatetime} onChange={setDepartDatetime} />
           <div className="flex flex-col gap-1 mt-1">
@@ -679,12 +716,43 @@ export default function ReservationTool() {
           </div>
         </div>
 
+        {/* Date & heure — retour (AR uniquement) */}
+        {form.tripType === "AR" && (
+          <div className="flex flex-col gap-2 mb-2">
+            <label className="text-xs font-medium text-[#091424]/60 uppercase tracking-wide">
+              Date et heure — Retour
+            </label>
+            <DateTimePicker value={retourDatetime} onChange={setRetourDatetime} />
+            {(() => {
+              const hRetour = parseInt(retourDatetime.time.split(":")[0], 10);
+              const jRetour = new Date(`${retourDatetime.date}T${retourDatetime.time}`).getDay();
+              return (
+                <div className="flex flex-col gap-1 mt-1">
+                  {(hRetour >= 22 || hRetour < 5) && (
+                    <p className="flex items-center gap-1.5 text-xs text-[#1FA3BA]">
+                      <Clock size={12} /> Majoration nuit +25% sera appliquée au retour
+                    </p>
+                  )}
+                  {jRetour === 0 && (
+                    <p className="flex items-center gap-1.5 text-xs text-[#1FA3BA]">
+                      <Calendar size={12} /> Supplément dimanche +10€ sera appliqué au retour
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
         <NavButtons
           onBack={back}
           onNext={next}
           nextDisabled={
             !pickupValid || !destinationValid ||
-            (form.tripType === "AR" && (!returnPickupValid || !returnDestinationValid))
+            (form.tripType === "AR" && (
+              !returnDestinationValid ||
+              (returnDifferentPickup && !returnPickupValid)
+            ))
           }
         />
       </div>
@@ -711,9 +779,15 @@ export default function ReservationTool() {
               <span className="text-[#091424] font-medium">{form.firstName} {form.lastName}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-[#091424]/50">Date</span>
+              <span className="text-[#091424]/50">{form.tripType === "AR" ? "Départ" : "Date"}</span>
               <span className="text-[#091424] font-medium">{departDatetime.date} à {departDatetime.time}</span>
             </div>
+            {form.tripType === "AR" && (
+              <div className="flex justify-between text-sm">
+                <span className="text-[#091424]/50">Retour</span>
+                <span className="text-[#091424] font-medium">{retourDatetime.date} à {retourDatetime.time}</span>
+              </div>
+            )}
             <div className="flex justify-between text-sm">
               <span className="text-[#091424]/50">Véhicule</span>
               <span className="text-[#091424] font-medium">{form.vehicle === "suv" ? "SUV Premium" : "Van Premium"}</span>
@@ -810,7 +884,8 @@ export default function ReservationTool() {
                 <p className="text-sm text-[#091424]">{form.destination}</p>
               </div>
               <div className="border-t border-[#091424]/8 pt-2.5 flex flex-wrap gap-x-6 gap-y-1">
-                <span className="text-xs text-[#091424]/50">{departDatetime.date} · {departDatetime.time}</span>
+                <span className="text-xs text-[#091424]/50">Départ : {departDatetime.date} · {departDatetime.time}</span>
+                {form.tripType === "AR" && <span className="text-xs text-[#091424]/50">Retour : {retourDatetime.date} · {retourDatetime.time}</span>}
                 <span className="text-xs text-[#091424]/50">{form.vehicle === "suv" ? "SUV 4 places" : "Van 8 places"}</span>
                 <span className="text-xs text-[#091424]/50">{form.tripType === "AR" ? "Aller-retour" : "Aller simple"}</span>
               </div>
