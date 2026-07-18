@@ -557,7 +557,7 @@ export default function ReservationTool() {
     if (step === "pickup") return (
       <>
         <Question text="Vous partez d'où ?" />
-        <AddressAutocomplete label="" value={form.pickup} onChange={v => set("pickup", v)} onValidated={setPickupValid}
+        <AddressAutocomplete key="pickup" label="" value={form.pickup} onChange={v => set("pickup", v)} onValidated={setPickupValid}
           placeholder="Ex : Aéroport Roland Garros, Sainte-Marie" showGeolocate />
         <ContinueBtn disabled={!pickupValid} onClick={() => push("Vous partez d'où ?", form.pickup, "destination")} />
       </>
@@ -567,7 +567,7 @@ export default function ReservationTool() {
     if (step === "destination") return (
       <>
         <Question text="Et votre destination ?" />
-        <AddressAutocomplete label="" value={form.destination} onChange={v => set("destination", v)} onValidated={setDestinationValid}
+        <AddressAutocomplete key="destination" label="" value={form.destination} onChange={v => set("destination", v)} onValidated={setDestinationValid}
           placeholder="Ex : Hôtel Iloha, Saint-Leu" />
         <ContinueBtn disabled={!destinationValid} onClick={() => {
           push("Et votre destination ?", form.destination, form.tripType === "AR" ? "returnDestination" : "datetime");
