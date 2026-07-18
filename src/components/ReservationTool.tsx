@@ -74,6 +74,36 @@ const DIAL_CODES = [
   { code: "+54",  flag: "🇦🇷", label: "Argentine",        country: "AR" },
 ];
 
+/* ─── Timezones ─── */
+const TIMEZONES = [
+  { label: "🇷🇪 La Réunion",          offset: +4,    id: "RE" },
+  { label: "🇫🇷 Paris (hiver)",        offset: +1,    id: "FR-W" },
+  { label: "🇫🇷 Paris (été)",          offset: +2,    id: "FR-S" },
+  { label: "🇬🇧 Londres (GMT)",        offset:  0,    id: "GB" },
+  { label: "🇾🇹 Mayotte",             offset: +3,    id: "YT" },
+  { label: "🇲🇬 Madagascar",          offset: +3,    id: "MG" },
+  { label: "🇲🇺 Maurice",             offset: +4,    id: "MU" },
+  { label: "🇦🇪 Dubaï",               offset: +4,    id: "AE" },
+  { label: "🇮🇳 Inde",                offset: +5.5,  id: "IN" },
+  { label: "🇨🇳 Chine / Singapour",   offset: +8,    id: "CN" },
+  { label: "🇯🇵 Japon",               offset: +9,    id: "JP" },
+  { label: "🇦🇺 Australie (Est)",     offset: +10,   id: "AU" },
+  { label: "🇿🇦 Afrique du Sud",      offset: +2,    id: "ZA" },
+  { label: "🇧🇷 Brésil (Brasilia)",   offset: -3,    id: "BR" },
+  { label: "🇺🇸 New York (EST)",      offset: -5,    id: "US-E" },
+  { label: "🇺🇸 Los Angeles (PST)",   offset: -8,    id: "US-W" },
+  { label: "🇨🇦 Montréal",            offset: -5,    id: "CA" },
+];
+
+const REUNION_OFFSET = +4; // UTC+4
+
+function toRéunionTime(time: string, fromOffset: number): string {
+  const [h, m] = time.split(":").map(Number);
+  const totalMin = h * 60 + m + (REUNION_OFFSET - fromOffset) * 60;
+  const norm = ((totalMin % 1440) + 1440) % 1440;
+  return `${String(Math.floor(norm / 60)).padStart(2,"0")}:${String(norm % 60).padStart(2,"0")}`;
+}
+
 /* ─── DateTimePicker ─── */
 const JOURS_FR = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
 const MOIS_FR  = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
@@ -91,7 +121,11 @@ function DateTimePicker({ value, onChange }: { value: { date: string; time: stri
   const today = new Date(); today.setHours(0,0,0,0);
   const [calYear,  setCalYear]  = useState(today.getFullYear());
   const [calMonth, setCalMonth] = useState(today.getMonth());
+  const [tzId,     setTzId]     = useState("RE");
   const timeListRef = useRef<HTMLDivElement>(null);
+
+  const tz = TIMEZONES.find(t => t.id === tzId) ?? TIMEZONES[0];
+  const isLocalTz = tz.offset === REUNION_OFFSET;
 
   useEffect(() => {
     const el = timeListRef.current?.querySelector("[data-selected=true]") as HTMLElement | null;
@@ -155,9 +189,10 @@ function DateTimePicker({ value, onChange }: { value: { date: string; time: stri
         </div>
         <div ref={timeListRef} className="w-28 overflow-y-auto" style={{ maxHeight: 280 }}>
           {TIME_SLOTS.map(slot => {
-            const sel = slot === value.time;
+            const reunionTime = isLocalTz ? slot : toRéunionTime(slot, tz.offset);
+            const sel = reunionTime === value.time;
             return (
-              <button key={slot} data-selected={sel} onClick={() => onChange({ ...value, time: slot })}
+              <button key={slot} data-selected={sel} onClick={() => onChange({ ...value, time: reunionTime })}
                 className={`w-full px-3 py-2.5 text-sm font-medium text-center transition-all ${
                   sel ? "bg-white text-[#091424] shadow-sm" : "text-[#091424]/60 hover:bg-[#091424]/5 hover:text-[#091424]"
                 }`}>
@@ -167,11 +202,27 @@ function DateTimePicker({ value, onChange }: { value: { date: string; time: stri
           })}
         </div>
       </div>
-      {selectedLabel && (
-        <div className="border-t border-[#091424]/8 px-4 py-3 bg-white">
-          <p className="text-sm text-[#091424]/70">Départ prévu le <span className="text-[#091424] font-medium">{selectedLabel}</span></p>
+
+      {/* Timezone + summary */}
+      <div className="border-t border-[#091424]/8 px-4 py-3 bg-white flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-xs text-[#091424]/40 shrink-0">Fuseau :</span>
+          <select value={tzId} onChange={e => setTzId(e.target.value)}
+            className="text-xs text-[#091424]/70 bg-transparent border-none outline-none cursor-pointer truncate max-w-[160px]">
+            {TIMEZONES.map(t => (
+              <option key={t.id} value={t.id}>{t.label} (UTC{t.offset >= 0 ? "+" : ""}{t.offset})</option>
+            ))}
+          </select>
         </div>
-      )}
+        {selectedLabel && !isLocalTz && (
+          <p className="text-xs text-[#1FA3BA] shrink-0">
+            = <span className="font-medium">{value.time}</span> heure Réunion
+          </p>
+        )}
+        {selectedLabel && isLocalTz && (
+          <p className="text-xs text-[#091424]/50 shrink-0 font-medium">{selectedLabel}</p>
+        )}
+      </div>
     </div>
   );
 }
@@ -249,12 +300,6 @@ export default function ReservationTool() {
 
   const set = (key: keyof FormData, val: unknown) => setForm(f => ({ ...f, [key]: val }));
 
-  // Auto-fill destination retour = pickup aller
-  useEffect(() => {
-    if (pickupValid && form.pickup && !form.returnDestination)
-      set("returnDestination", form.pickup);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pickupValid, form.pickup]);
 
   // Scroll to top on step change
   useEffect(() => {
