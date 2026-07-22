@@ -255,6 +255,7 @@ function ThreadItem({ q, a }: { q: string; a: string }) {
 function ContinueBtn({ onClick, disabled = false, label = "Continuer" }: { onClick: () => void; disabled?: boolean; label?: string }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
       className="flex items-center gap-2 bg-[#091424] text-white text-sm font-medium pl-5 pr-4 py-3 rounded-full hover:bg-[#091424]/85 transition-all disabled:opacity-30 disabled:cursor-not-allowed group mt-6"
@@ -303,7 +304,7 @@ export default function ReservationTool() {
 
   // Scroll to top on step change
   useEffect(() => {
-    containerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    containerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [step]);
 
   const heureDepart  = parseInt(departDatetime.time.split(":")[0], 10);
