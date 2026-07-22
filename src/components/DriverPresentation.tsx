@@ -51,10 +51,10 @@ export default function DriverPresentation() {
           <div className="lg:pb-6">
             <h2 className="font-heading text-white text-3xl sm:text-4xl md:text-5xl font-light leading-tight mb-5 lg:mb-6">
               Sébastien,
-              <span className="block italic text-[#1FA3BA]">votre chauffeur VTC</span>
+              <span className="block italic text-[#1FA3BA]">votre chauffeur privé</span>
             </h2>
             <p className="text-white/60 leading-relaxed mb-4 text-sm sm:text-base">
-              Sébastien a créé GS Transport avec une conviction simple : un trajet en VTC
+              Sébastien a créé GS Transport avec une conviction simple : un trajet avec un chauffeur privé
               doit être aussi agréable qu'efficace. Pas de surprise, pas d'attente —
               juste un service irréprochable, à chaque course.
             </p>

@@ -5,11 +5,11 @@ import { ArrowUpRight, Star, MapPin } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 
 const SLIDES = [
-  { src: "/Hero/Card Hero/forest.jpg",   label: "Transfert Aéroport",     sub: "Roland Garros · 24h/24",      pos: "object-center" },
-  { src: "/Hero/Card Hero/beach.jpg",    label: "Navette Hôtel",          sub: "Prise en charge à domicile",  pos: "object-left" },
-  { src: "/Hero/Card Hero/volcano.jpg",  label: "Soirées & Événements",   sub: "Mariages, dîners, galas",     pos: "object-right-bottom" },
-  { src: "/Hero/Card Hero/road.jpg",     label: "Business",               sub: "Réunions, séminaires, RDV",   pos: "object-top" },
-  { src: "/Hero/Card Hero/mounts.jpg",   label: "Mise à disposition",     sub: "À l'heure · Sur mesure",      pos: "object-bottom" },
+  { src: "/Hero/Card Hero/forest.jpg",   label: "Transfert Aéroport",     sub: "Roland Garros · 24h/24",    pos: "object-center" },
+  { src: "/Hero/Card Hero/beach.jpg",    label: "Navette Hôtel",          sub: "À domicile · Sur appel",    pos: "object-left" },
+  { src: "/Hero/Card Hero/volcano.jpg",  label: "Soirées & Événements",   sub: "Mariages, dîners, galas",   pos: "object-right-bottom" },
+  { src: "/Hero/Card Hero/road.jpg",     label: "Business",               sub: "Réunions · Séminaires",     pos: "object-top" },
+  { src: "/Hero/Card Hero/mounts.jpg",   label: "Mise à disposition",     sub: "À l'heure · Sur mesure",    pos: "object-bottom" },
 ];
 
 const N        = SLIDES.length;
@@ -103,8 +103,8 @@ export default function Hero() {
 
           {/* Titre */}
           <h1 className="font-heading text-white text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-light leading-[1.05] mb-5 lg:mb-6">
-            Le VTC premium<br />
-            de{" "}
+            Votre chauffeur privé<br />
+            à{" "}
             <span className="italic text-[#1FA3BA]">La Réunion</span>
             <br />à votre service
           </h1>
@@ -125,7 +125,7 @@ export default function Hero() {
                   </div>
                 ))}
               </div>
-              <span className="text-white text-xs sm:text-sm font-medium">+50 clients</span>
+              <span className="text-white text-xs sm:text-sm font-medium">+260 clients récurrents</span>
             </div>
             <div className="w-px h-5 bg-white/40" />
             <div className="flex items-center gap-1.5">
@@ -154,7 +154,7 @@ export default function Hero() {
               <div
                 key={i}
                 className="snap-start shrink-0 relative rounded-2xl overflow-hidden border border-white/10 shadow-xl"
-                style={{ width: 150, height: 200 }}
+                style={{ width: 165, height: 210 }}
               >
                 <Image src={slide.src} alt={slide.label} fill className={`object-cover ${slide.pos}`} />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#091424]/80 via-transparent to-transparent" />

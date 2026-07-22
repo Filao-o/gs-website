@@ -374,12 +374,16 @@ export default function ReservationTool() {
                 <ArrowRight size={14} />
               </span>
             </button>
-            <button
-              onClick={() => setStep("custom")}
-              className="flex items-center gap-2 border border-[#091424]/12 text-[#091424]/50 hover:text-[#091424] hover:border-[#091424]/25 text-sm font-medium px-6 py-3.5 rounded-full transition-all"
-            >
-              Trajet personnalisé <ChevronRight size={14} />
-            </button>
+            <div className="flex flex-col gap-1">
+              <button
+                type="button"
+                onClick={() => setStep("custom")}
+                className="flex items-center gap-2 border border-[#091424]/12 text-[#091424]/50 hover:text-[#091424] hover:border-[#091424]/25 text-sm font-medium px-6 py-3.5 rounded-full transition-all"
+              >
+                Trajet personnalisé <ChevronRight size={14} />
+              </button>
+              <p className="text-xs text-[#091424]/35 px-2">Contacter directement le chauffeur pour un besoin spécifique</p>
+            </div>
           </div>
           <p className="text-xs text-[#091424]/30 mt-4">Prend moins de 2 minutes · Paiement à bord</p>
         </div>

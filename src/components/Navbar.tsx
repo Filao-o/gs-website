@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { ArrowUpRight, Menu, Phone, X } from "lucide-react";
 
 const links = [
   { label: "Accueil", href: "/" },
@@ -27,13 +27,13 @@ export default function Navbar() {
         scrolled ? "bg-[#091424]/95 backdrop-blur-md pt-3 pb-3 shadow-xl" : ""
       }`}
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-center">
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
 
-        {/* Logo — pill de fond sur hero, texte navy au scroll */}
-        <a href="/" className="hidden flex items-center gap-2 z-10">
-          <span className="font-heading text-3xl font-bold text-[#1FA3BA] leading-none">GS</span>
+        {/* Logo */}
+        <a href="/" className="flex items-center gap-2 z-10">
+          <span className="font-heading text-2xl lg:text-3xl font-bold text-[#1FA3BA] leading-none">GS</span>
           <span
-            className={`font-heading text-base font-light tracking-[0.2em] uppercase transition-colors duration-300 ${
+            className={`font-heading text-sm lg:text-base font-light tracking-[0.2em] uppercase transition-colors duration-300 ${
               scrolled ? "text-white" : "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]"
             }`}
           >
@@ -65,8 +65,15 @@ export default function Navbar() {
           ))}
         </nav>
 
-        {/* Right CTA — sans téléphone */}
-        <div className="hidden items-center">
+        {/* Right — téléphone + CTA */}
+        <div className="hidden lg:flex items-center gap-3">
+          <a
+            href="tel:+262693512282"
+            className={`flex items-center gap-2 text-sm font-medium transition-colors ${scrolled ? "text-white/80 hover:text-white" : "text-white/90 hover:text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]"}`}
+          >
+            <Phone size={14} />
+            0693 51 22 82
+          </a>
           <a
             href="/#reservation"
             className="flex items-center gap-2 bg-[#1FA3BA] text-white text-sm font-medium pl-5 pr-3 py-2.5 rounded-full hover:bg-[#1FA3BA]/90 transition-all group"
@@ -103,7 +110,13 @@ export default function Navbar() {
                 {l.label}
               </a>
             ))}
-            <div className="pt-3 mt-2 border-t border-white/10">
+            <div className="pt-3 mt-2 border-t border-white/10 flex flex-col gap-3">
+              <a
+                href="tel:+262693512282"
+                className="flex items-center justify-center gap-2 text-white/70 text-sm font-medium py-2"
+              >
+                <Phone size={14} /> 0693 51 22 82
+              </a>
               <a
                 href="/#reservation"
                 className="flex items-center justify-center gap-2 bg-[#1FA3BA] text-white text-sm font-medium px-5 py-3 rounded-full"

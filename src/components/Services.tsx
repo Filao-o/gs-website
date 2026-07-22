@@ -39,7 +39,7 @@ export default function Services() {
 
         <div className="text-center mb-10 lg:mb-16">
           <h2 className="font-heading text-[#091424] text-4xl md:text-5xl font-light">
-            Un VTC pour chaque besoin
+            Un chauffeur privé pour chaque besoin
           </h2>
           <p className="text-[#091424]/60 mt-4 max-w-xl mx-auto">
             Que ce soit à 6h du matin pour un vol ou à minuit après une soirée,
