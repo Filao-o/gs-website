@@ -54,7 +54,7 @@ export default function Blog() {
         <div className="grid md:grid-cols-3 gap-8">
           {posts.map((p) => (
             <article key={p.title} className="group">
-              <div className="aspect-[16/9] rounded-xl bg-[#E8E6DB] mb-5 overflow-hidden">
+              <div className="aspect-[16/9] rounded-xl bg-[#091424]/6 mb-5 overflow-hidden">
                 <div className="w-full h-full bg-gradient-to-br from-[#091424]/10 to-[#1FA3BA]/10 group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="flex items-center gap-3 mb-3">

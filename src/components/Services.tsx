@@ -34,7 +34,7 @@ const advantages = [
 
 export default function Services() {
   return (
-    <section id="services" className="py-16 lg:py-24 bg-[#F5F4F0]">
+    <section id="services" className="py-16 lg:py-24 bg-white">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
         <div className="text-center mb-10 lg:mb-16">

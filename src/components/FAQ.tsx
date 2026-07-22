@@ -38,7 +38,7 @@ export default function FAQ() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <section id="faq" className="py-24 bg-[#F5F4F0]">
+    <section id="faq" className="py-24 bg-white">
       <div className="max-w-3xl mx-auto px-6 lg:px-8">
         <div className="mb-14">
           <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#1FA3BA] mb-3">Questions fréquentes</p>

@@ -157,7 +157,7 @@ function DateTimePicker({ value, onChange }: { value: { date: string; time: stri
   })();
 
   return (
-    <div className="rounded-2xl border border-[#091424]/10 overflow-hidden bg-[#F5F4F0]">
+    <div className="rounded-2xl border border-[#091424]/10 overflow-hidden bg-[#091424]/4">
       <div className="flex divide-x divide-[#091424]/8" style={{ minHeight: 280 }}>
         <div className="flex-1 p-4">
           <div className="flex items-center justify-between mb-4">
@@ -402,7 +402,7 @@ export default function ReservationTool() {
         <p className="text-[#091424]/50 text-sm leading-relaxed max-w-sm mx-auto mb-8">
           Sébastien va vous contacter au <span className="text-[#091424] font-medium">{form.phoneCountry} {form.phone}</span> pour confirmer votre réservation.
         </p>
-        <div className="bg-[#F5F4F0] rounded-2xl p-5 text-left flex flex-col gap-3 mb-8">
+        <div className="bg-[#091424]/4 rounded-2xl p-5 text-left flex flex-col gap-3 mb-8">
           {[
             ["Client", `${form.firstName} ${form.lastName}`],
             ["Départ", `${departDatetime.date} · ${departDatetime.time}`],
@@ -435,11 +435,11 @@ export default function ReservationTool() {
         <Question text="Décrivez-nous votre projet." />
         <div className="flex flex-col gap-4">
           <input type="text" value={form.customName} onChange={e => set("customName", e.target.value)} placeholder="Votre nom"
-            className="w-full bg-[#F5F4F0] border border-[#091424]/10 rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all" />
+            className="w-full bg-[#091424]/4 border border-[#091424]/10 rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all" />
           <input type="tel" inputMode="numeric" value={form.customPhone} onChange={e => set("customPhone", e.target.value.replace(/[^0-9]/g, ""))} placeholder="Votre téléphone"
-            className="w-full bg-[#F5F4F0] border border-[#091424]/10 rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all" />
+            className="w-full bg-[#091424]/4 border border-[#091424]/10 rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all" />
           <textarea value={form.customDescription} onChange={e => set("customDescription", e.target.value)} placeholder="Décrivez votre trajet, vos dates, vos besoins…" rows={4}
-            className="w-full bg-[#F5F4F0] border border-[#091424]/10 rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all resize-none" />
+            className="w-full bg-[#091424]/4 border border-[#091424]/10 rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all resize-none" />
         </div>
         <ContinueBtn label="Envoyer ma demande" onClick={() => setConfirmed(true)} disabled={!form.customName || !form.customPhone || !form.customDescription} />
       </div>
@@ -456,7 +456,7 @@ export default function ReservationTool() {
         <input autoFocus type="text" value={form.firstName} onChange={e => set("firstName", e.target.value)}
           onKeyDown={e => { if (e.key === "Enter" && form.firstName.trim()) push("Quel est votre prénom ?", form.firstName, "lastName"); }}
           placeholder="Marie"
-          className="w-full bg-[#F5F4F0] border border-[#091424]/10 rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all" />
+          className="w-full bg-[#091424]/4 border border-[#091424]/10 rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all" />
         <ContinueBtn disabled={!form.firstName.trim()} onClick={() => push("Quel est votre prénom ?", form.firstName, "lastName")} />
       </>
     );
@@ -468,7 +468,7 @@ export default function ReservationTool() {
         <input autoFocus type="text" value={form.lastName} onChange={e => set("lastName", e.target.value)}
           onKeyDown={e => { if (e.key === "Enter" && form.lastName.trim()) push(`Et votre nom de famille, ${form.firstName} ?`, form.lastName, "phone"); }}
           placeholder="Dupont"
-          className="w-full bg-[#F5F4F0] border border-[#091424]/10 rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all" />
+          className="w-full bg-[#091424]/4 border border-[#091424]/10 rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all" />
         <ContinueBtn disabled={!form.lastName.trim()} onClick={() => push(`Et votre nom de famille, ${form.firstName} ?`, form.lastName, "phone")} />
       </>
     );
@@ -481,7 +481,7 @@ export default function ReservationTool() {
           <div className="relative shrink-0">
             <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#1FA3BA] pointer-events-none" />
             <select value={form.phoneCountry} onChange={e => set("phoneCountry", e.target.value)}
-              className="bg-[#F5F4F0] border border-[#091424]/10 rounded-xl pl-8 pr-3 py-3 text-sm text-[#091424] focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all appearance-none cursor-pointer">
+              className="bg-[#091424]/4 border border-[#091424]/10 rounded-xl pl-8 pr-3 py-3 text-sm text-[#091424] focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all appearance-none cursor-pointer">
               {DIAL_CODES.map(d => <option key={d.code} value={d.code}>{d.flag} {d.code}</option>)}
             </select>
           </div>
@@ -493,7 +493,7 @@ export default function ReservationTool() {
               else if (!allowed.includes(e.key) && !/^[0-9]$/.test(e.key)) e.preventDefault();
             }}
             placeholder="0692 XX XX XX"
-            className={`flex-1 bg-[#F5F4F0] border rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:ring-2 transition-all ${
+            className={`flex-1 bg-[#091424]/4 border rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:ring-2 transition-all ${
               form.phone && !phoneValid ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-[#091424]/10 focus:border-[#1FA3BA] focus:ring-[#1FA3BA]/15"
             }`} />
         </div>
@@ -517,7 +517,7 @@ export default function ReservationTool() {
             { val: "AR" as TripType, label: "Aller-retour", desc: "Sébastien vous attend et vous ramène.", icon: <><ArrowRight size={16} className="text-[#1FA3BA]" /><ArrowLeft size={16} className="text-[#1FA3BA]" /></> },
           ]).map(o => (
             <button key={o.val} onClick={() => set("tripType", o.val)}
-              className={`text-left rounded-2xl p-5 border-2 transition-all ${form.tripType === o.val ? "border-[#1FA3BA] bg-[#1FA3BA]/5" : "border-[#091424]/8 bg-[#F5F4F0] hover:border-[#1FA3BA]/40"}`}>
+              className={`text-left rounded-2xl p-5 border-2 transition-all ${form.tripType === o.val ? "border-[#1FA3BA] bg-[#1FA3BA]/5" : "border-[#091424]/8 bg-[#091424]/4 hover:border-[#1FA3BA]/40"}`}>
               <div className="flex items-center gap-1.5 mb-3">{o.icon}</div>
               <p className="font-semibold text-[#091424] text-sm mb-1">{o.label}</p>
               <p className="text-[#091424]/50 text-xs">{o.desc}</p>
@@ -539,7 +539,7 @@ export default function ReservationTool() {
             { val: "van" as Vehicle, name: "Van Premium",  specs: "8 passagers · Climatisé · Grand coffre",  badge: "Groupes & familles", Icon: Users },
           ]).map(v => (
             <button key={v.val} onClick={() => set("vehicle", v.val)}
-              className={`text-left flex items-center gap-4 rounded-2xl p-5 border-2 transition-all ${form.vehicle === v.val ? "border-[#1FA3BA] bg-[#1FA3BA]/5" : "border-[#091424]/8 bg-[#F5F4F0] hover:border-[#1FA3BA]/40"}`}>
+              className={`text-left flex items-center gap-4 rounded-2xl p-5 border-2 transition-all ${form.vehicle === v.val ? "border-[#1FA3BA] bg-[#1FA3BA]/5" : "border-[#091424]/8 bg-[#091424]/4 hover:border-[#1FA3BA]/40"}`}>
               <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${form.vehicle === v.val ? "bg-[#1FA3BA]/15" : "bg-[#091424]/6"}`}>
                 <v.Icon size={20} className={form.vehicle === v.val ? "text-[#1FA3BA]" : "text-[#091424]/50"} />
               </div>

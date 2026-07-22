@@ -107,7 +107,7 @@ export default function AddressAutocomplete({
           onBlur={handleBlur}
           onChange={handleChange}
           placeholder={placeholder}
-          className={`w-full bg-[#F5F4F0] border rounded-xl pl-9 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:ring-2 transition-all ${
+          className={`w-full bg-[#091424]/4 border rounded-xl pl-9 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:ring-2 transition-all ${
             showGeolocate ? "pr-10" : "pr-4"
           } ${
             error

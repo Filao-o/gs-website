@@ -74,7 +74,7 @@ function ReviewCard({ r }: { r: typeof reviews[0] }) {
 
 export default function Testimonials() {
   return (
-    <section id="avis" className="py-16 lg:py-24 bg-[#F5F4F0] overflow-hidden">
+    <section id="avis" className="py-16 lg:py-24 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
         {/* Header */}
@@ -96,10 +96,10 @@ export default function Testimonials() {
       <div className="relative">
         {/* Fade left */}
         <div className="absolute left-0 top-0 bottom-0 w-24 lg:w-40 z-10 pointer-events-none"
-          style={{ background: "linear-gradient(to right, #F5F4F0, transparent)" }} />
+          style={{ background: "linear-gradient(to right, #ffffff, transparent)" }} />
         {/* Fade right */}
         <div className="absolute right-0 top-0 bottom-0 w-24 lg:w-40 z-10 pointer-events-none"
-          style={{ background: "linear-gradient(to left, #F5F4F0, transparent)" }} />
+          style={{ background: "linear-gradient(to left, #ffffff, transparent)" }} />
 
         <div className="flex gap-5 ticker-track">
           {DOUBLED.map((r, i) => (
