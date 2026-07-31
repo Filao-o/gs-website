@@ -224,7 +224,7 @@ function DateTimePicker({ value, onChange }: { value: { date: string; time: stri
                     sel
                       ? "bg-[#091424] text-white"
                       : past
-                      ? "text-[#091424]/20 cursor-not-allowed"
+                      ? "bg-[#091424]/6 text-[#091424]/25 cursor-not-allowed"
                       : "text-[#091424] hover:bg-[#091424]/8"
                   }`}>
                   {day}
@@ -269,7 +269,7 @@ function DateTimePicker({ value, onChange }: { value: { date: string; time: stri
       {/* Timezone + summary */}
       <div className="border-t border-[#091424]/8 px-4 py-3 bg-white flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-xs text-[#091424]/40 shrink-0">Fuseau :</span>
+          <span className="text-xs font-semibold text-[#091424]/50 shrink-0">Fuseau :</span>
           <select value={tzId} onChange={e => setTzId(e.target.value)}
             className="text-xs text-[#091424]/70 bg-transparent border-none outline-none cursor-pointer truncate max-w-[160px]">
             {TIMEZONES.map(t => (
@@ -335,7 +335,7 @@ function Question({ text }: { text: string }) {
 }
 
 /* ─── Main component ─── */
-export default function ReservationTool() {
+export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?: "dark" | "image" }) {
   const [step,      setStep]      = useState<StepId>("intro");
   const [form,      setForm]      = useState<FormData>(INITIAL);
   const [thread,    setThread]    = useState<ThreadEntry[]>([]);
@@ -402,40 +402,65 @@ export default function ReservationTool() {
     setStep(next);
   }, []);
 
-  const calculerDistance = async () => {
+  const calculerDistance = async (heure: number, jour: number) => {
     setLoading(true); setErreur(null); setPrix(null);
     try {
       const params = new URLSearchParams({ origine: form.pickup, destination: form.destination });
       const res  = await fetch(`/api/distance?${params}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erreur calcul");
-      const result = calculerPrix(form.pickup, form.destination, data.distanceKm, data.dureeMin, heureDepart, jourSemaine, form.tripType === "AR");
+      const result = calculerPrix(form.pickup, form.destination, data.distanceKm, data.dureeMin, heure, jour, form.tripType === "AR");
       setPrix(result);
     } catch (e: unknown) {
       setErreur(e instanceof Error ? e.message : "Erreur inconnue");
     } finally { setLoading(false); }
   };
 
-  useEffect(() => { if (step === "price") calculerDistance(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [step]);
+  useEffect(() => {
+    if (step === "price") calculerDistance(heureDepart, jourSemaine);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   // ─── INTRO ───
   if (step === "intro") return (
-    <div ref={containerRef} className="max-w-2xl mx-auto">
+    <div ref={containerRef}>
       <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#091424]/5">
-        <div className="bg-[#091424] px-8 pt-10 pb-8 lg:px-12 lg:pt-14 lg:pb-10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-[#1FA3BA]/20 rounded-xl flex items-center justify-center">
-              <Car size={20} className="text-[#1FA3BA]" />
+        {heroVariant === "image" ? (
+          <div className="relative px-8 pt-10 pb-8 lg:px-12 lg:pt-14 lg:pb-10 overflow-hidden min-h-[220px]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/Hero/Card Hero/road.jpg" alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
+            <div className="absolute inset-0 bg-[#091424]/70 backdrop-blur-[2px]" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-[#1FA3BA]/20 rounded-xl flex items-center justify-center">
+                  <Car size={20} className="text-[#1FA3BA]" />
+                </div>
+                <span className="text-white/60 text-sm font-medium">GS Transport · Réservation</span>
+              </div>
+              <h2 className="font-heading text-white text-3xl lg:text-4xl font-light leading-snug mb-3">
+                Planifiez votre trajet<br />en quelques instants.
+              </h2>
+              <p className="text-white/55 text-sm leading-relaxed max-w-sm">
+                Répondez à quelques questions et obtenez une estimation du tarif immédiatement.
+              </p>
             </div>
-            <span className="text-white/50 text-sm font-medium">GS Transport · Réservation</span>
           </div>
-          <h2 className="font-heading text-white text-3xl lg:text-4xl font-light leading-snug mb-3">
-            Planifiez votre trajet<br />en quelques instants.
-          </h2>
-          <p className="text-white/50 text-sm leading-relaxed max-w-sm">
-            Répondez à quelques questions et obtenez une estimation du tarif immédiatement.
-          </p>
-        </div>
+        ) : (
+          <div className="bg-[#091424] px-8 pt-10 pb-8 lg:px-12 lg:pt-14 lg:pb-10">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-[#1FA3BA]/20 rounded-xl flex items-center justify-center">
+                <Car size={20} className="text-[#1FA3BA]" />
+              </div>
+              <span className="text-white/50 text-sm font-medium">GS Transport · Réservation</span>
+            </div>
+            <h2 className="font-heading text-white text-3xl lg:text-4xl font-light leading-snug mb-3">
+              Planifiez votre trajet<br />en quelques instants.
+            </h2>
+            <p className="text-white/50 text-sm leading-relaxed max-w-sm">
+              Répondez à quelques questions et obtenez une estimation du tarif immédiatement.
+            </p>
+          </div>
+        )}
         <div className="px-8 py-8 lg:px-12">
           <div className="flex flex-col sm:flex-row gap-3 items-start">
             <button
@@ -766,9 +791,12 @@ export default function ReservationTool() {
         {prix && !loading && (
           <div className="bg-[#091424] rounded-2xl p-6 mb-4">
             {/* Top row: Estimation label + km/durée en blanc */}
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-white/50 text-xs uppercase tracking-widest">Estimation</p>
-              <p className="text-white text-xs">{prix.distanceKm} km · {prix.dureeMin} min</p>
+            <div className="flex items-start justify-between mb-1 gap-4">
+              <p className="text-white text-xs uppercase tracking-widest">Estimation</p>
+              <div className="text-right shrink-0">
+                <p className="text-white text-xs">Distance : {prix.distanceKm} km</p>
+                <p className="text-white text-xs">Durée estimée : {prix.dureeMin} min</p>
+              </div>
             </div>
             <p className="font-heading text-white text-5xl font-light mb-4">{prix.prixFinal} €</p>
             {(prix.majoration || prix.supplements.length > 0) && (
@@ -807,8 +835,8 @@ export default function ReservationTool() {
   const progress    = currentIdx >= 0 ? (currentIdx + 1) / activeSteps.length : 1 / STEPS_AS.length;
 
   return (
-    <div ref={containerRef} className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-3xl shadow-sm border border-[#091424]/5 overflow-hidden">
+    <div ref={containerRef}>
+      <div className="bg-white rounded-3xl shadow-sm border border-[#091424]/5">
 
         {/* Progress bar */}
         <div className="h-0.5 bg-[#091424]/6">
