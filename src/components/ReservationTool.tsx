@@ -783,7 +783,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
         {erreur && !loading && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mb-4 text-center">
             <p className="text-red-600 text-sm">{erreur}</p>
-            <button onClick={calculerDistance} className="text-xs text-red-400 mt-2 underline">Réessayer</button>
+            <button onClick={() => calculerDistance(heureDepart, jourSemaine)} className="text-xs text-red-400 mt-2 underline">Réessayer</button>
           </div>
         )}
 
