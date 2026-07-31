@@ -30,16 +30,9 @@ export async function POST(req: NextRequest) {
     } = body;
 
     const [date, time] = departDatetime.split(" à ");
-    const [day, month, year] = date.split("/");
     const [hour, minute] = time.split(":");
-
-    const startTime = new Date(
-      parseInt(year),
-      parseInt(month) - 1,
-      parseInt(day),
-      parseInt(hour),
-      parseInt(minute)
-    );
+    // date is YYYY-MM-DD, combine with time directly
+    const startTime = new Date(`${date}T${hour.padStart(2,"0")}:${minute.padStart(2,"0")}:00+04:00`);
     const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
 
     const vehicleLabel = vehicle === "suv" ? "SUV Premium 4 places" : "Van Premium 8 places";
