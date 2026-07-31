@@ -97,7 +97,7 @@ export function calculerPrix(
     supps.push({ label: "Supplément dimanche", montant: SUPPLEMENTS.dimanche });
   }
 
-  const prixFinal = Math.round(prixBase + supps.reduce((a, s) => a + s.montant, 0));
+  const prixFinal = Math.ceil(prixBase + supps.reduce((a, s) => a + s.montant, 0));
 
   return {
     prixBase: Math.round(prixBase * 100) / 100,

@@ -12,7 +12,7 @@ import RouteMap from "./RouteMap";
 
 /* ─── Types ─── */
 type TripType = "AS" | "AR" | null;
-type Vehicle  = "suv" | "van";
+type Vehicle  = "suv";
 
 interface FormData {
   firstName:          string;
@@ -430,7 +430,7 @@ export default function ReservationTool() {
             ["Client", `${form.firstName} ${form.lastName}`],
             ["Départ", `${departDatetime.date} · ${departDatetime.time}`],
             ...(form.tripType === "AR" ? [["Retour", `${retourDatetime.date} · ${retourDatetime.time}`]] : []),
-            ["Véhicule", form.vehicle === "suv" ? "SUV Premium — 4 places" : "Van Premium — 8 places"],
+            ["Véhicule", "SUV Premium — 4 places"],
             ["Trajet", form.tripType === "AR" ? "Aller-retour" : "Aller simple"],
             ...(prix ? [["Estimation", `${prix.prixFinal} €`]] : []),
           ].map(([k, v]) => (
@@ -548,7 +548,7 @@ export default function ReservationTool() {
             </button>
           ))}
         </div>
-        <ContinueBtn disabled={!form.tripType} onClick={() => push("Quel type de trajet souhaitez-vous ?", form.tripType === "AS" ? "Aller simple" : "Aller-retour", "vehicle")} />
+        <ContinueBtn disabled={!form.tripType} onClick={() => push("Quel type de trajet souhaitez-vous ?", form.tripType === "AS" ? "Aller simple" : "Aller-retour", "pickup")} />
       </>
     );
 
@@ -661,6 +661,23 @@ export default function ReservationTool() {
       <>
         <Question text="Voici votre estimation." />
 
+        {/* Résumé trajet */}
+        <div className="bg-[#091424]/4 border border-[#091424]/8 rounded-2xl px-5 py-4 mb-6 flex flex-col gap-2">
+          {[
+            { label: "Client", value: `${form.firstName} ${form.lastName}` },
+            { label: "Trajet", value: form.tripType === "AR" ? "Aller-retour" : "Aller simple" },
+            { label: "Départ", value: form.pickup },
+            { label: "Destination", value: form.destination },
+            { label: "Date aller", value: `${departDatetime.date} à ${departDatetime.time}` },
+            ...(form.tripType === "AR" ? [{ label: "Date retour", value: `${retourDatetime.date} à ${retourDatetime.time}` }] : []),
+          ].map(({ label, value }) => (
+            <div key={label} className="flex justify-between text-sm gap-4">
+              <span className="text-[#091424]/40 shrink-0">{label}</span>
+              <span className="text-[#091424]/80 font-medium text-right">{value}</span>
+            </div>
+          ))}
+        </div>
+
         {/* Map */}
         <div className="mb-6">
           <RouteMap origin={form.pickup} destination={form.destination} />
@@ -695,23 +712,17 @@ export default function ReservationTool() {
                 <p className="text-white/40 text-xs">{prix.dureeMin} min</p>
               </div>
             </div>
-            <div className="border-t border-white/10 pt-4 flex flex-col gap-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-white/50">Base ({form.tripType === "AR" ? "aller-retour" : "aller simple"})</span>
-                <span className="text-white">{prix.prixBase} €</span>
+            {(prix.majoration || prix.supplements.length > 0) && (
+              <div className="border-t border-white/10 pt-4 flex flex-col gap-2">
+                {prix.majoration && <div className="flex justify-between text-sm"><span className="text-white/50">{prix.majoration}</span><span className="text-[#1FA3BA]">inclus</span></div>}
+                {prix.supplements.map(s => (
+                  <div key={s.label} className="flex justify-between text-sm">
+                    <span className="text-white/50">{s.label}</span>
+                    <span className="text-[#1FA3BA]">+{s.montant} €</span>
+                  </div>
+                ))}
               </div>
-              {prix.majoration && <div className="flex justify-between text-sm"><span className="text-white/50">{prix.majoration}</span><span className="text-[#1FA3BA]">inclus</span></div>}
-              {prix.supplements.map(s => (
-                <div key={s.label} className="flex justify-between text-sm">
-                  <span className="text-white/50">{s.label}</span>
-                  <span className="text-[#1FA3BA]">+{s.montant} €</span>
-                </div>
-              ))}
-              <div className="flex justify-between text-sm font-medium border-t border-white/10 pt-2 mt-1">
-                <span className="text-white">Total</span>
-                <span className="text-[#1FA3BA] text-base">{prix.prixFinal} €</span>
-              </div>
-            </div>
+            )}
           </div>
         )}
 
@@ -737,13 +748,6 @@ export default function ReservationTool() {
     <div ref={containerRef} className="max-w-2xl mx-auto">
       <div className="bg-white rounded-3xl shadow-sm border border-[#091424]/5 overflow-hidden">
 
-        {/* Thread — réponses passées */}
-        {thread.length > 0 && (
-          <div className="px-8 pt-6 pb-2 lg:px-12 border-b border-[#091424]/5">
-            {thread.map((t, i) => <ThreadItem key={i} q={t.question} a={t.answer} />)}
-          </div>
-        )}
-
         {/* Question active */}
         <div className="px-8 py-8 lg:px-12 lg:py-10">
           {!isFirstConvStep && (
@@ -751,12 +755,11 @@ export default function ReservationTool() {
               const prev = thread[thread.length - 1];
               if (!prev) { setStep("intro"); return; }
               setThread(t => t.slice(0,-1));
-              // Rewind step — rebuild from thread
-              const steps: StepId[] = ["firstName","lastName","phone","tripType","vehicle","pickup","destination","returnDestination","datetime","retourDatetime","price"];
+              const steps: StepId[] = ["firstName","lastName","phone","tripType","pickup","datetime","destination","returnDestination","retourDatetime","price"];
               const idx = steps.indexOf(step as StepId);
               setStep(idx > 0 ? steps[idx-1] : "intro");
-            }} className="flex items-center gap-1.5 text-xs text-[#091424]/35 hover:text-[#091424]/60 transition-colors mb-6">
-              <ArrowLeft size={13} /> Modifier
+            }} className="flex items-center gap-2 text-sm font-medium text-[#091424]/70 hover:text-[#091424] transition-colors mb-8 border border-[#091424]/10 hover:border-[#091424]/25 rounded-full px-4 py-2 w-fit">
+              <ArrowLeft size={15} /> Retour
             </button>
           )}
           {renderStep()}
