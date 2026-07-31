@@ -377,7 +377,14 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
   const [returnPickupValid,      setReturnPickupValid]      = useState(false);
   const [showReturnPickup,       setShowReturnPickup]       = useState(false);
 
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef      = useRef<HTMLDivElement>(null);
+  const departDatetimeRef = useRef(departDatetime);
+  const retourDatetimeRef = useRef(retourDatetime);
+  const formRef           = useRef(form);
+
+  useEffect(() => { departDatetimeRef.current = departDatetime; }, [departDatetime]);
+  useEffect(() => { retourDatetimeRef.current = retourDatetime; }, [retourDatetime]);
+  useEffect(() => { formRef.current = form; }, [form]);
 
   const set = (key: keyof FormData, val: unknown) => setForm(f => ({ ...f, [key]: val }));
 
@@ -402,14 +409,20 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
     setStep(next);
   }, []);
 
-  const calculerDistance = async (heure: number, jour: number) => {
+  const calculerDistance = async () => {
+    // Lire depuis les refs pour éviter les closures périmées
+    const dt    = departDatetimeRef.current;
+    const f     = formRef.current;
+    const heure = parseInt(dt.time.split(":")[0], 10);
+    const jour  = new Date(`${dt.date}T${dt.time}`).getDay();
+
     setLoading(true); setErreur(null); setPrix(null);
     try {
-      const params = new URLSearchParams({ origine: form.pickup, destination: form.destination });
+      const params = new URLSearchParams({ origine: f.pickup, destination: f.destination });
       const res  = await fetch(`/api/distance?${params}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erreur calcul");
-      const result = calculerPrix(form.pickup, form.destination, data.distanceKm, data.dureeMin, heure, jour, form.tripType === "AR");
+      const result = calculerPrix(f.pickup, f.destination, data.distanceKm, data.dureeMin, heure, jour, f.tripType === "AR");
       setPrix(result);
     } catch (e: unknown) {
       setErreur(e instanceof Error ? e.message : "Erreur inconnue");
@@ -417,7 +430,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
   };
 
   useEffect(() => {
-    if (step === "price") calculerDistance(heureDepart, jourSemaine);
+    if (step === "price") calculerDistance();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
@@ -783,7 +796,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
         {erreur && !loading && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mb-4 text-center">
             <p className="text-red-600 text-sm">{erreur}</p>
-            <button onClick={() => calculerDistance(heureDepart, jourSemaine)} className="text-xs text-red-400 mt-2 underline">Réessayer</button>
+            <button onClick={calculerDistance} className="text-xs text-red-400 mt-2 underline">Réessayer</button>
           </div>
         )}
 
