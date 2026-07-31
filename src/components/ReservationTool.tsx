@@ -287,6 +287,29 @@ export default function ReservationTool() {
   const [erreur,   setErreur]   = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
 
+  const createCalendarEvent = async () => {
+    try {
+      await fetch("/api/calendar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          phone: `${form.phoneCountry} ${form.phone}`,
+          pickup: form.pickup,
+          destination: form.destination,
+          tripType: form.tripType,
+          vehicle: form.vehicle,
+          departDatetime: `${departDatetime.date} à ${departDatetime.time}`,
+          retourDatetime: form.tripType === "AR" ? `${retourDatetime.date} à ${retourDatetime.time}` : null,
+          prix: prix?.prixFinal ?? null,
+        }),
+      });
+    } catch (e) {
+      console.error("Calendar event error:", e);
+    }
+  };
+
   const todayStr = new Date().toISOString().split("T")[0];
   const [departDatetime, setDepartDatetime] = useState({ date: todayStr, time: "09:00" });
   const [retourDatetime, setRetourDatetime] = useState({ date: todayStr, time: "12:00" });
@@ -382,7 +405,7 @@ export default function ReservationTool() {
               >
                 Trajet personnalisé <ChevronRight size={14} />
               </button>
-              <p className="text-xs text-[#091424]/35 px-2">Contacter directement le chauffeur pour un besoin spécifique</p>
+              <p className="text-xs text-[#091424]/50 px-2">Contacter directement le chauffeur pour un besoin spécifique</p>
             </div>
           </div>
           <p className="text-xs text-[#091424]/30 mt-4">Prend moins de 2 minutes · Paiement à bord</p>
@@ -698,7 +721,7 @@ export default function ReservationTool() {
               <CheckCircle size={15} className="text-[#1FA3BA] shrink-0" />
               <p className="text-sm text-[#091424]/70">Paiement directement auprès du chauffeur à bord.</p>
             </div>
-            <ContinueBtn label="Envoyer ma demande" onClick={() => setConfirmed(true)} />
+            <ContinueBtn label="Envoyer ma demande" onClick={() => { setConfirmed(true); createCalendarEvent(); }} />
           </>
         )}
       </>

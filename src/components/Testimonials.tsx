@@ -54,7 +54,7 @@ const DOUBLED = [...reviews, ...reviews];
 
 function ReviewCard({ r }: { r: typeof reviews[0] }) {
   return (
-    <div className="shrink-0 w-[320px] lg:w-[380px] bg-white rounded-2xl p-7 shadow-sm flex flex-col gap-4">
+    <div className="shrink-0 w-[320px] lg:w-[380px] bg-white rounded-2xl p-7 shadow-md border border-[#091424]/8 flex flex-col gap-4">
       <Quote size={24} className="text-[#091424]/15" />
       <p className="text-[#091424]/70 leading-relaxed text-sm flex-1">{r.text}</p>
       <div className="flex items-center justify-between pt-2 border-t border-[#091424]/8">
