@@ -13,55 +13,138 @@ interface Props {
   showGeolocate?: boolean;
 }
 
-export default function AddressAutocomplete({
-  label, value, onChange, onValidated, placeholder, showGeolocate = false
-}: Props) {
-  const inputRef      = useRef<HTMLInputElement>(null);
-  const acRef         = useRef<google.maps.places.Autocomplete | null>(null);
-  const [ready, setReady]         = useState(false);
-  const [validated, setValidated] = useState(!!value);
-  const [geoLoading, setGeoLoading] = useState(false);
-  const [error, setError]         = useState<string | null>(null);
+interface Prediction {
+  place_id: string;
+  description: string;
+  structured_formatting: {
+    main_text: string;
+    main_text_matched_substrings: Array<{ offset: number; length: number }>;
+    secondary_text: string;
+  };
+}
 
-  useEffect(() => { loadGoogleMaps().then(() => setReady(true)); }, []);
+function highlightMain(
+  text: string,
+  matches: Array<{ offset: number; length: number }>
+): React.ReactNode[] {
+  const parts: React.ReactNode[] = [];
+  let cursor = 0;
+  for (const m of matches) {
+    if (m.offset > cursor) parts.push(<span key={`p-${cursor}`} className="text-[#091424]/60">{text.slice(cursor, m.offset)}</span>);
+    parts.push(<span key={`m-${m.offset}`} className="text-[#1FA3BA] font-medium">{text.slice(m.offset, m.offset + m.length)}</span>);
+    cursor = m.offset + m.length;
+  }
+  if (cursor < text.length) parts.push(<span key="tail" className="text-[#091424]/60">{text.slice(cursor)}</span>);
+  return parts;
+}
+
+function parseSecondary(secondary: string): { commune: string; rest: string } {
+  const parts = secondary.split(",").map(s => s.trim()).filter(Boolean);
+  // Drop trailing "Réunion" / "France" as it's implicit
+  const filtered = parts.filter(p => p !== "Réunion" && p !== "France");
+  const commune = filtered[0] ?? parts[0] ?? "";
+  const rest = filtered.slice(1).join(", ");
+  return { commune, rest };
+}
+
+export default function AddressAutocomplete({
+  label, value, onChange, onValidated, placeholder, showGeolocate = false,
+}: Props) {
+  const inputRef        = useRef<HTMLInputElement>(null);
+  const serviceRef      = useRef<google.maps.places.AutocompleteService | null>(null);
+  const placesRef       = useRef<google.maps.places.PlacesService | null>(null);
+  const dummyRef        = useRef<HTMLDivElement>(null);
+  const containerRef    = useRef<HTMLDivElement>(null);
+
+  const [ready,       setReady]       = useState(false);
+  const [validated,   setValidated]   = useState(!!value);
+  const [geoLoading,  setGeoLoading]  = useState(false);
+  const [error,       setError]       = useState<string | null>(null);
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
+  const [open,        setOpen]        = useState(false);
+  const debounceRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    loadGoogleMaps().then(() => {
+      serviceRef.current = new window.google.maps.places.AutocompleteService();
+      placesRef.current  = new window.google.maps.places.PlacesService(dummyRef.current!);
+      setReady(true);
+    });
+  }, []);
 
   const markValid = useCallback((val: boolean) => {
     setValidated(val);
     onValidated?.(val);
   }, [onValidated]);
 
+  // Close dropdown on outside click
   useEffect(() => {
-    if (!ready || !inputRef.current) return;
-
-    acRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
-      componentRestrictions: { country: "re" },
-      fields: ["formatted_address", "name", "geometry"],
-    });
-
-    acRef.current.addListener("place_changed", () => {
-      const place = acRef.current?.getPlace();
-      const adresse = place?.formatted_address ?? place?.name ?? "";
-      if (adresse) {
-        onChange(adresse);
-        markValid(true);
-        setError(null);
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
       }
-    });
-
-    return () => {
-      if (acRef.current) window.google.maps.event.clearInstanceListeners(acRef.current);
     };
-  }, [ready, onChange, markValid]);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
-  const handleBlur = () => {
-    if (!validated && inputRef.current?.value) {
-      setError("Veuillez sélectionner une adresse dans la liste");
+  const fetchPredictions = useCallback((input: string) => {
+    if (!ready || !serviceRef.current || input.length < 2) {
+      setPredictions([]);
+      setOpen(false);
+      return;
     }
-  };
+    serviceRef.current.getPlacePredictions(
+      { input, componentRestrictions: { country: "re" }, types: ["geocode"] },
+      (results, status) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
+          setPredictions(results as unknown as Prediction[]);
+          setOpen(true);
+        } else {
+          setPredictions([]);
+          setOpen(false);
+        }
+      }
+    );
+  }, [ready]);
 
-  const handleChange = () => {
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
     if (validated) markValid(false);
     setError(null);
+    onChange(val);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchPredictions(val), 220);
+  };
+
+  const selectPrediction = (pred: Prediction) => {
+    if (!placesRef.current) return;
+    placesRef.current.getDetails(
+      { placeId: pred.place_id, fields: ["formatted_address"] },
+      (place, status) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && place?.formatted_address) {
+          if (inputRef.current) inputRef.current.value = place.formatted_address;
+          onChange(place.formatted_address);
+          markValid(true);
+        } else {
+          // Fallback to description
+          if (inputRef.current) inputRef.current.value = pred.description;
+          onChange(pred.description);
+          markValid(true);
+        }
+        setPredictions([]);
+        setOpen(false);
+        setError(null);
+      }
+    );
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => {
+      if (!validated && inputRef.current?.value) {
+        setError("Veuillez sélectionner une adresse dans la liste");
+      }
+    }, 200);
   };
 
   const geolocate = async () => {
@@ -72,7 +155,7 @@ export default function AddressAutocomplete({
       async (pos) => {
         const { latitude, longitude } = pos.coords;
         try {
-          const res = await fetch(
+          const res  = await fetch(
             `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&language=fr`
           );
           const data = await res.json();
@@ -81,6 +164,7 @@ export default function AddressAutocomplete({
             inputRef.current.value = adresse;
             onChange(adresse);
             markValid(true);
+            setOpen(false);
           }
         } catch {
           setError("Impossible de récupérer votre position");
@@ -97,16 +181,21 @@ export default function AddressAutocomplete({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-medium text-[#091424]/60 uppercase tracking-wide">{label}</label>
-      <div className="relative">
+      {/* Hidden div for PlacesService */}
+      <div ref={dummyRef} className="hidden" />
+
+      {label && <label className="text-xs font-medium text-[#091424]/60 uppercase tracking-wide">{label}</label>}
+
+      <div ref={containerRef} className="relative">
         <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#1FA3BA] z-10 pointer-events-none" />
         <input
           ref={inputRef}
           type="text"
           defaultValue={value}
           onBlur={handleBlur}
-          onChange={handleChange}
+          onChange={handleInput}
           placeholder={placeholder}
+          autoComplete="off"
           className={`w-full bg-[#091424]/4 border rounded-xl pl-9 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:ring-2 transition-all ${
             showGeolocate ? "pr-10" : "pr-4"
           } ${
@@ -131,7 +220,39 @@ export default function AddressAutocomplete({
             {geoLoading ? <Loader2 size={15} className="animate-spin" /> : <Locate size={15} />}
           </button>
         )}
+
+        {/* Custom predictions dropdown */}
+        {open && predictions.length > 0 && (
+          <div className="absolute z-50 top-full mt-1.5 left-0 right-0 bg-white border border-[#091424]/10 rounded-2xl shadow-xl overflow-hidden">
+            {predictions.map((pred, idx) => {
+              const { commune, rest } = parseSecondary(pred.structured_formatting.secondary_text);
+              return (
+                <button
+                  key={pred.place_id}
+                  type="button"
+                  onMouseDown={() => selectPrediction(pred)}
+                  className={`w-full text-left px-4 py-3 flex gap-3 items-start hover:bg-[#091424]/4 transition-colors ${idx > 0 ? "border-t border-[#091424]/6" : ""}`}
+                >
+                  <MapPin size={14} className="text-[#1FA3BA] shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    {/* Commune — big and visible */}
+                    <p className="text-sm font-semibold text-[#091424] leading-snug">{commune}</p>
+                    {/* Street — highlighted match */}
+                    <p className="text-xs mt-0.5 leading-snug">
+                      {highlightMain(
+                        pred.structured_formatting.main_text,
+                        pred.structured_formatting.main_text_matched_substrings ?? []
+                      )}
+                      {rest ? <span className="text-[#091424]/30"> · {rest}</span> : null}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
+
       {error && <p className="text-xs text-red-500">{error}</p>}
       {showGeolocate && !validated && !error && (
         <button

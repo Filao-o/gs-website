@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   ArrowRight, ArrowLeft, Car, Phone, MapPin,
-  Calendar, CheckCircle, Clock, Send, ChevronRight, Loader2, Users
+  Calendar, CheckCircle, Clock, ChevronRight, Loader2, Users
 } from "lucide-react";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { calculerPrix, type PrixResult } from "@/lib/pricing";
@@ -95,7 +95,7 @@ const TIMEZONES = [
   { label: "🇨🇦 Montréal",            offset: -5,    id: "CA" },
 ];
 
-const REUNION_OFFSET = +4; // UTC+4
+const REUNION_OFFSET = +4;
 
 function toRéunionTime(time: string, fromOffset: number): string {
   const [h, m] = time.split(":").map(Number);
@@ -104,10 +104,17 @@ function toRéunionTime(time: string, fromOffset: number): string {
   return `${String(Math.floor(norm / 60)).padStart(2,"0")}:${String(norm % 60).padStart(2,"0")}`;
 }
 
-/* ─── DateTimePicker ─── */
+/* ─── Date helpers ─── */
+const MOIS_LONG_FR = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
 const JOURS_FR = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
 const MOIS_FR  = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 
+function formatDateFr(dateStr: string): string {
+  const [y, mo, d] = dateStr.split("-").map(Number);
+  return `${d} ${MOIS_LONG_FR[mo - 1]} ${y}`;
+}
+
+/* ─── DateTimePicker ─── */
 function buildTimeSlots(): string[] {
   const slots: string[] = [];
   for (let h = 0; h < 24; h++)
@@ -117,14 +124,30 @@ function buildTimeSlots(): string[] {
 }
 const TIME_SLOTS = buildTimeSlots();
 
+function parseManualTime(raw: string): string | null {
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length === 0) return null;
+  let h: number, m: number;
+  if (digits.length <= 2) {
+    h = parseInt(digits, 10); m = 0;
+  } else if (digits.length === 3) {
+    h = parseInt(digits[0], 10); m = parseInt(digits.slice(1), 10);
+  } else {
+    h = parseInt(digits.slice(0, 2), 10); m = parseInt(digits.slice(2, 4), 10);
+  }
+  if (h > 23 || m > 59) return null;
+  return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+}
+
 function DateTimePicker({ value, onChange }: { value: { date: string; time: string }; onChange: (v: { date: string; time: string }) => void }) {
   const today = new Date(); today.setHours(0,0,0,0);
-  const [calYear,  setCalYear]  = useState(today.getFullYear());
-  const [calMonth, setCalMonth] = useState(today.getMonth());
-  const [tzId,     setTzId]     = useState("RE");
-  const timeListRef = useRef<HTMLDivElement>(null);
+  const [calYear,    setCalYear]    = useState(today.getFullYear());
+  const [calMonth,   setCalMonth]   = useState(today.getMonth());
+  const [tzId,       setTzId]       = useState("RE");
+  const [manualTime, setManualTime] = useState(value.time);
+  const timeListRef  = useRef<HTMLDivElement>(null);
 
-  const tz = TIMEZONES.find(t => t.id === tzId) ?? TIMEZONES[0];
+  const tz        = TIMEZONES.find(t => t.id === tzId) ?? TIMEZONES[0];
   const isLocalTz = tz.offset === REUNION_OFFSET;
 
   useEffect(() => {
@@ -156,9 +179,28 @@ function DateTimePicker({ value, onChange }: { value: { date: string; time: stri
     return `${dow} ${d} ${MOIS_FR[mo-1]} à ${value.time}`;
   })();
 
+  const handleManualTimeChange = (raw: string) => {
+    setManualTime(raw);
+    const parsed = parseManualTime(raw);
+    if (parsed) {
+      const reunionTime = isLocalTz ? parsed : toRéunionTime(parsed, tz.offset);
+      onChange({ ...value, time: reunionTime });
+    }
+  };
+
+  const handleManualBlur = () => {
+    const parsed = parseManualTime(manualTime);
+    if (parsed) {
+      setManualTime(parsed);
+    } else {
+      setManualTime(value.time);
+    }
+  };
+
   return (
     <div className="rounded-2xl border border-[#091424]/10 overflow-hidden bg-[#091424]/4">
       <div className="flex divide-x divide-[#091424]/8" style={{ minHeight: 280 }}>
+        {/* Calendar */}
         <div className="flex-1 p-4">
           <div className="flex items-center justify-between mb-4">
             <button onClick={prevMonth} disabled={!canGoPrev} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[#091424]/6 transition-colors disabled:opacity-20">
@@ -179,7 +221,11 @@ function DateTimePicker({ value, onChange }: { value: { date: string; time: stri
               return (
                 <button key={day} onClick={() => selectDay(day)} disabled={past}
                   className={`aspect-square w-full max-w-[36px] mx-auto flex items-center justify-center rounded-full text-xs transition-all font-medium ${
-                    sel ? "bg-[#091424] text-white" : past ? "text-[#091424]/20 line-through cursor-not-allowed" : "text-[#091424] hover:bg-[#091424]/8"
+                    sel
+                      ? "bg-[#091424] text-white"
+                      : past
+                      ? "text-[#091424]/20 cursor-not-allowed"
+                      : "text-[#091424] hover:bg-[#091424]/8"
                   }`}>
                   {day}
                 </button>
@@ -187,19 +233,36 @@ function DateTimePicker({ value, onChange }: { value: { date: string; time: stri
             })}
           </div>
         </div>
-        <div ref={timeListRef} className="w-28 overflow-y-auto" style={{ maxHeight: 280 }}>
-          {TIME_SLOTS.map(slot => {
-            const reunionTime = isLocalTz ? slot : toRéunionTime(slot, tz.offset);
-            const sel = reunionTime === value.time;
-            return (
-              <button key={slot} data-selected={sel} onClick={() => onChange({ ...value, time: reunionTime })}
-                className={`w-full px-3 py-2.5 text-sm font-medium text-center transition-all ${
-                  sel ? "bg-white text-[#091424] shadow-sm" : "text-[#091424]/60 hover:bg-[#091424]/5 hover:text-[#091424]"
-                }`}>
-                {slot}
-              </button>
-            );
-          })}
+
+        {/* Time panel */}
+        <div className="w-28 flex flex-col">
+          {/* Manual input */}
+          <div className="px-3 py-2 border-b border-[#091424]/8 bg-white">
+            <input
+              type="text"
+              value={manualTime}
+              onChange={e => handleManualTimeChange(e.target.value)}
+              onBlur={handleManualBlur}
+              placeholder="09:00"
+              maxLength={5}
+              className="w-full text-center text-sm font-medium text-[#091424] placeholder-[#091424]/25 bg-transparent outline-none"
+            />
+          </div>
+          {/* Slots list */}
+          <div ref={timeListRef} className="flex-1 overflow-y-auto" style={{ maxHeight: 248 }}>
+            {TIME_SLOTS.map(slot => {
+              const reunionTime = isLocalTz ? slot : toRéunionTime(slot, tz.offset);
+              const sel = reunionTime === value.time;
+              return (
+                <button key={slot} data-selected={sel} onClick={() => { onChange({ ...value, time: reunionTime }); setManualTime(reunionTime); }}
+                  className={`w-full px-3 py-2.5 text-sm font-medium text-center transition-all ${
+                    sel ? "bg-white text-[#091424] shadow-sm" : "text-[#091424]/60 hover:bg-[#091424]/5 hover:text-[#091424]"
+                  }`}>
+                  {slot}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -241,15 +304,9 @@ type StepId =
 /* ─── Thread entry ─── */
 interface ThreadEntry { question: string; answer: string; }
 
-/* ─── Conversation bubble (past Q&A) ─── */
-function ThreadItem({ q, a }: { q: string; a: string }) {
-  return (
-    <div className="flex flex-col gap-1 py-3 border-b border-[#091424]/6 last:border-0">
-      <p className="text-xs text-[#091424]/35 font-medium">{q}</p>
-      <p className="text-sm text-[#091424]/70 font-medium">{a}</p>
-    </div>
-  );
-}
+/* ─── Progress steps ─── */
+const STEPS_AS: StepId[] = ["firstName","lastName","phone","tripType","pickup","destination","datetime","price"];
+const STEPS_AR: StepId[] = ["firstName","lastName","phone","tripType","pickup","datetime","destination","returnDestination","retourDatetime","price"];
 
 /* ─── Continue button ─── */
 function ContinueBtn({ onClick, disabled = false, label = "Continuer" }: { onClick: () => void; disabled?: boolean; label?: string }) {
@@ -279,12 +336,12 @@ function Question({ text }: { text: string }) {
 
 /* ─── Main component ─── */
 export default function ReservationTool() {
-  const [step,     setStep]     = useState<StepId>("intro");
-  const [form,     setForm]     = useState<FormData>(INITIAL);
-  const [thread,   setThread]   = useState<ThreadEntry[]>([]);
-  const [prix,     setPrix]     = useState<PrixResult | null>(null);
-  const [loading,  setLoading]  = useState(false);
-  const [erreur,   setErreur]   = useState<string | null>(null);
+  const [step,      setStep]      = useState<StepId>("intro");
+  const [form,      setForm]      = useState<FormData>(INITIAL);
+  const [thread,    setThread]    = useState<ThreadEntry[]>([]);
+  const [prix,      setPrix]      = useState<PrixResult | null>(null);
+  const [loading,   setLoading]   = useState(false);
+  const [erreur,    setErreur]    = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
 
   const createCalendarEvent = async () => {
@@ -314,31 +371,28 @@ export default function ReservationTool() {
   const [departDatetime, setDepartDatetime] = useState({ date: todayStr, time: "09:00" });
   const [retourDatetime, setRetourDatetime] = useState({ date: todayStr, time: "12:00" });
 
-  const [pickupValid,             setPickupValid]             = useState(false);
-  const [destinationValid,        setDestinationValid]        = useState(false);
-  const [returnDestinationValid,  setReturnDestinationValid]  = useState(false);
-  const [returnPickupValid,       setReturnPickupValid]       = useState(false);
-  const [showReturnPickup,        setShowReturnPickup]        = useState(false);
+  const [pickupValid,            setPickupValid]            = useState(false);
+  const [destinationValid,       setDestinationValid]       = useState(false);
+  const [returnDestinationValid, setReturnDestinationValid] = useState(false);
+  const [returnPickupValid,      setReturnPickupValid]      = useState(false);
+  const [showReturnPickup,       setShowReturnPickup]       = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
   const set = (key: keyof FormData, val: unknown) => setForm(f => ({ ...f, [key]: val }));
 
-
-  // Scroll to top on step change
   useEffect(() => {
     containerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [step]);
 
-  const heureDepart  = parseInt(departDatetime.time.split(":")[0], 10);
-  const jourSemaine  = new Date(`${departDatetime.date}T${departDatetime.time}`).getDay();
-  const heureRetour  = parseInt(retourDatetime.time.split(":")[0], 10);
-  const jourRetour   = new Date(`${retourDatetime.date}T${retourDatetime.time}`).getDay();
+  const heureDepart = parseInt(departDatetime.time.split(":")[0], 10);
+  const jourSemaine = new Date(`${departDatetime.date}T${departDatetime.time}`).getDay();
+  const heureRetour = parseInt(retourDatetime.time.split(":")[0], 10);
+  const jourRetour  = new Date(`${retourDatetime.date}T${retourDatetime.time}`).getDay();
 
-  // Phone validation
-  const dialEntry     = DIAL_CODES.find(d => d.code === form.phoneCountry) ?? DIAL_CODES[0];
-  const fullPhone     = `${form.phoneCountry}${form.phone}`;
-  const phoneValid    = form.phone.length >= 4 && (() => {
+  const dialEntry  = DIAL_CODES.find(d => d.code === form.phoneCountry) ?? DIAL_CODES[0];
+  const fullPhone  = `${form.phoneCountry}${form.phone}`;
+  const phoneValid = form.phone.length >= 4 && (() => {
     try { return isValidPhoneNumber(fullPhone, dialEntry.country as never); }
     catch { return false; }
   })();
@@ -362,14 +416,12 @@ export default function ReservationTool() {
     } finally { setLoading(false); }
   };
 
-  // Trigger price calc on price step
   useEffect(() => { if (step === "price") calculerDistance(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [step]);
 
   // ─── INTRO ───
   if (step === "intro") return (
     <div ref={containerRef} className="max-w-2xl mx-auto">
       <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#091424]/5">
-        {/* Top band */}
         <div className="bg-[#091424] px-8 pt-10 pb-8 lg:px-12 lg:pt-14 lg:pb-10">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-[#1FA3BA]/20 rounded-xl flex items-center justify-center">
@@ -384,31 +436,27 @@ export default function ReservationTool() {
             Répondez à quelques questions et obtenez une estimation du tarif immédiatement.
           </p>
         </div>
-
-        {/* Bottom */}
         <div className="px-8 py-8 lg:px-12">
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 items-start">
             <button
               onClick={() => setStep("firstName")}
-              className="flex items-center gap-2 bg-[#091424] text-white text-sm font-medium pl-6 pr-4 py-3.5 rounded-full hover:bg-[#091424]/85 transition-all group"
+              className="flex items-center gap-2 bg-[#091424] text-white text-sm font-medium pl-6 pr-4 py-3.5 rounded-full hover:bg-[#091424]/85 transition-all group shrink-0"
             >
               Commencer
               <span className="w-7 h-7 bg-white/15 rounded-full flex items-center justify-center group-hover:bg-white/25 transition-colors">
                 <ArrowRight size={14} />
               </span>
             </button>
-            <div className="flex flex-col gap-1">
-              <button
-                type="button"
-                onClick={() => setStep("custom")}
-                className="flex items-center gap-2 border border-[#091424]/12 text-[#091424]/50 hover:text-[#091424] hover:border-[#091424]/25 text-sm font-medium px-6 py-3.5 rounded-full transition-all"
-              >
-                Trajet personnalisé <ChevronRight size={14} />
-              </button>
-              <p className="text-xs text-[#091424]/50 px-2">Contacter directement le chauffeur pour un besoin spécifique</p>
-            </div>
+            <button
+              type="button"
+              onClick={() => setStep("custom")}
+              className="flex items-center gap-2 border border-[#091424]/12 text-[#091424]/50 hover:text-[#091424] hover:border-[#091424]/25 text-sm font-medium px-6 py-3.5 rounded-full transition-all shrink-0"
+            >
+              Trajet personnalisé <ChevronRight size={14} />
+            </button>
           </div>
-          <p className="text-xs text-[#091424]/30 mt-4">Prend moins de 2 minutes · Paiement à bord</p>
+          <p className="text-xs text-[#091424]/30 mt-4">Contacter le chauffeur directement pour un besoin spécifique.</p>
+          <p className="text-xs text-[#091424]/25 mt-1">Prend moins de 2 minutes · Paiement à bord</p>
         </div>
       </div>
     </div>
@@ -428,8 +476,8 @@ export default function ReservationTool() {
         <div className="bg-[#091424]/4 rounded-2xl p-5 text-left flex flex-col gap-3 mb-8">
           {[
             ["Client", `${form.firstName} ${form.lastName}`],
-            ["Départ", `${departDatetime.date} · ${departDatetime.time}`],
-            ...(form.tripType === "AR" ? [["Retour", `${retourDatetime.date} · ${retourDatetime.time}`]] : []),
+            ["Départ", `${formatDateFr(departDatetime.date)} à ${departDatetime.time}`],
+            ...(form.tripType === "AR" ? [["Retour", `${formatDateFr(retourDatetime.date)} à ${retourDatetime.time}`]] : []),
             ["Véhicule", "SUV Premium — 4 places"],
             ["Trajet", form.tripType === "AR" ? "Aller-retour" : "Aller simple"],
             ...(prix ? [["Estimation", `${prix.prixFinal} €`]] : []),
@@ -469,9 +517,8 @@ export default function ReservationTool() {
     </div>
   );
 
-  // ─── SHARED LAYOUT (conversational steps) ───
+  // ─── CONVERSATIONAL STEPS ───
   const renderStep = () => {
-
     // ── Prénom ──
     if (step === "firstName") return (
       <>
@@ -544,7 +591,8 @@ export default function ReservationTool() {
               <div className="flex items-center gap-1.5 mb-3">{o.icon}</div>
               <p className="font-semibold text-[#091424] text-sm mb-1">{o.label}</p>
               <p className="text-[#091424]/50 text-xs">{o.desc}</p>
-              {form.tripType === o.val && <CheckCircle size={16} className="text-[#1FA3BA] mt-3" />}
+              {/* Reserve space to avoid layout shift */}
+              <CheckCircle size={16} className={`mt-3 transition-opacity ${form.tripType === o.val ? "text-[#1FA3BA] opacity-100" : "opacity-0"}`} />
             </button>
           ))}
         </div>
@@ -625,7 +673,7 @@ export default function ReservationTool() {
         <ContinueBtn disabled={!returnDestinationValid || (showReturnPickup && !returnPickupValid)}
           onClick={() => {
             const pickupLabel = showReturnPickup ? ` · départ depuis ${form.returnPickup}` : "";
-            push("Et la destination de votre retour ?", form.returnDestination + pickupLabel, "datetime");
+            push("Et la destination de votre retour ?", form.returnDestination + pickupLabel, "retourDatetime");
           }} />
       </>
     );
@@ -661,21 +709,36 @@ export default function ReservationTool() {
       <>
         <Question text="Voici votre estimation." />
 
-        {/* Résumé trajet */}
-        <div className="bg-[#091424]/4 border border-[#091424]/8 rounded-2xl px-5 py-4 mb-6 flex flex-col gap-2">
-          {[
-            { label: "Client", value: `${form.firstName} ${form.lastName}` },
-            { label: "Trajet", value: form.tripType === "AR" ? "Aller-retour" : "Aller simple" },
-            { label: "Départ", value: form.pickup },
-            { label: "Destination", value: form.destination },
-            { label: "Date aller", value: `${departDatetime.date} à ${departDatetime.time}` },
-            ...(form.tripType === "AR" ? [{ label: "Date retour", value: `${retourDatetime.date} à ${retourDatetime.time}` }] : []),
-          ].map(({ label, value }) => (
-            <div key={label} className="flex justify-between text-sm gap-4">
-              <span className="text-[#091424]/40 shrink-0">{label}</span>
-              <span className="text-[#091424]/80 font-medium text-right">{value}</span>
+        {/* Résumé client — compact */}
+        <div className="border border-[#091424]/8 rounded-xl px-4 py-3 mb-3 flex items-center justify-between">
+          <span className="text-xs text-[#091424]/40">Client</span>
+          <span className="text-sm font-medium text-[#091424]">{form.firstName} {form.lastName}</span>
+        </div>
+
+        {/* Résumé trajet — compact */}
+        <div className="border border-[#091424]/8 rounded-xl px-4 py-3 mb-6 flex flex-col gap-2.5">
+          <div className="flex justify-between text-sm gap-4">
+            <span className="text-[#091424]/40 shrink-0">Type</span>
+            <span className="text-[#091424]/80 font-medium text-right">{form.tripType === "AR" ? "Aller-retour" : "Aller simple"}</span>
+          </div>
+          <div className="flex justify-between text-sm gap-4">
+            <span className="text-[#091424]/40 shrink-0">Départ</span>
+            <span className="text-[#091424]/80 font-medium text-right text-xs leading-snug">{form.pickup}</span>
+          </div>
+          <div className="flex justify-between text-sm gap-4">
+            <span className="text-[#091424]/40 shrink-0">Destination</span>
+            <span className="text-[#091424]/80 font-medium text-right text-xs leading-snug">{form.destination}</span>
+          </div>
+          <div className="flex justify-between text-sm gap-4">
+            <span className="text-[#091424]/40 shrink-0">Date aller</span>
+            <span className="text-[#091424]/80 font-medium text-right">{formatDateFr(departDatetime.date)} à {departDatetime.time}</span>
+          </div>
+          {form.tripType === "AR" && (
+            <div className="flex justify-between text-sm gap-4">
+              <span className="text-[#091424]/40 shrink-0">Date retour</span>
+              <span className="text-[#091424]/80 font-medium text-right">{formatDateFr(retourDatetime.date)} à {retourDatetime.time}</span>
             </div>
-          ))}
+          )}
         </div>
 
         {/* Map */}
@@ -702,16 +765,12 @@ export default function ReservationTool() {
         {/* Prix */}
         {prix && !loading && (
           <div className="bg-[#091424] rounded-2xl p-6 mb-4">
-            <div className="flex items-end justify-between mb-4">
-              <div>
-                <p className="text-white/50 text-xs uppercase tracking-widest mb-1">Estimation</p>
-                <p className="font-heading text-white text-5xl font-light">{prix.prixFinal} €</p>
-              </div>
-              <div className="text-right">
-                <p className="text-white/40 text-xs">{prix.distanceKm} km</p>
-                <p className="text-white/40 text-xs">{prix.dureeMin} min</p>
-              </div>
+            {/* Top row: Estimation label + km/durée en blanc */}
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-white/50 text-xs uppercase tracking-widest">Estimation</p>
+              <p className="text-white text-xs">{prix.distanceKm} km · {prix.dureeMin} min</p>
             </div>
+            <p className="font-heading text-white text-5xl font-light mb-4">{prix.prixFinal} €</p>
             {(prix.majoration || prix.supplements.length > 0) && (
               <div className="border-t border-white/10 pt-4 flex flex-col gap-2">
                 {prix.majoration && <div className="flex justify-between text-sm"><span className="text-white/50">{prix.majoration}</span><span className="text-[#1FA3BA]">inclus</span></div>}
@@ -743,10 +802,18 @@ export default function ReservationTool() {
 
   // ─── CONVERSATIONAL SHELL ───
   const isFirstConvStep = step === "firstName";
+  const activeSteps = form.tripType === "AR" ? STEPS_AR : STEPS_AS;
+  const currentIdx  = activeSteps.indexOf(step as StepId);
+  const progress    = currentIdx >= 0 ? (currentIdx + 1) / activeSteps.length : 1 / STEPS_AS.length;
 
   return (
     <div ref={containerRef} className="max-w-2xl mx-auto">
       <div className="bg-white rounded-3xl shadow-sm border border-[#091424]/5 overflow-hidden">
+
+        {/* Progress bar */}
+        <div className="h-0.5 bg-[#091424]/6">
+          <div className="h-full bg-[#1FA3BA] transition-all duration-500" style={{ width: `${progress * 100}%` }} />
+        </div>
 
         {/* Question active */}
         <div className="px-8 py-8 lg:px-12 lg:py-10">
