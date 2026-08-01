@@ -83,12 +83,15 @@ export function calculerPrix(
   if (allerRetour) prixBase *= MULTIPLICATEUR_AR;
   prixBase = Math.max(prixBase, TARIF_MINIMUM);
 
+  // Arrondir la base en premier — les majorations se calculent sur ce montant affiché
+  const prixBaseArrondi = Math.ceil(prixBase);
+
   const supps: { label: string; montant: number }[] = [];
 
   // Nuit : 22h → 5h
   const estNuit = heureDepart >= SUPPLEMENTS.nuit_heure_debut || heureDepart < SUPPLEMENTS.nuit_heure_fin;
   if (estNuit && SUPPLEMENTS.nuit_majoration > 0) {
-    const montant = Math.round(prixBase * SUPPLEMENTS.nuit_majoration * 100) / 100;
+    const montant = Math.ceil(prixBaseArrondi * SUPPLEMENTS.nuit_majoration);
     supps.push({ label: `Majoration nuit +${SUPPLEMENTS.nuit_majoration * 100}%`, montant });
   }
 
@@ -97,7 +100,7 @@ export function calculerPrix(
     supps.push({ label: "Supplément dimanche", montant: SUPPLEMENTS.dimanche });
   }
 
-  const prixFinal = Math.ceil(prixBase + supps.reduce((a, s) => a + s.montant, 0));
+  const prixFinal = prixBaseArrondi + supps.reduce((a, s) => a + s.montant, 0);
 
   return {
     prixBase: Math.round(prixBase * 100) / 100,
