@@ -55,6 +55,7 @@ export default function AddressAutocomplete({
   const placesRef       = useRef<google.maps.places.PlacesService | null>(null);
   const dummyRef        = useRef<HTMLDivElement>(null);
   const containerRef    = useRef<HTMLDivElement>(null);
+  const selectingRef    = useRef(false);
 
   const [ready,       setReady]       = useState(false);
   const [validated,   setValidated]   = useState(!!value);
@@ -119,6 +120,7 @@ export default function AddressAutocomplete({
 
   const selectPrediction = (pred: Prediction) => {
     if (!placesRef.current) return;
+    selectingRef.current = true;
     placesRef.current.getDetails(
       { placeId: pred.place_id, fields: ["formatted_address"] },
       (place, status) => {
@@ -135,16 +137,17 @@ export default function AddressAutocomplete({
         setPredictions([]);
         setOpen(false);
         setError(null);
+        selectingRef.current = false;
       }
     );
   };
 
   const handleBlur = () => {
     setTimeout(() => {
-      if (!validated && inputRef.current?.value) {
+      if (!validated && !selectingRef.current && inputRef.current?.value) {
         setError("Veuillez sélectionner une adresse dans la liste");
       }
-    }, 200);
+    }, 300);
   };
 
   const geolocate = async () => {
