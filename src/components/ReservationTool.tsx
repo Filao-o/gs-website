@@ -617,28 +617,32 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
       </>
     );
 
-    // ── Email ──
+    // ── Email (facultatif) ──
     if (step === "email") {
       const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
+      const canContinue = emailValid || form.email === "";
       return (
         <>
           <Question text="Votre adresse email ?" />
-          <p className="text-[#091424]/40 text-xs mb-4 -mt-4">Pour recevoir la confirmation de votre réservation.</p>
+          <p className="text-[#091424]/50 text-sm -mt-4 mb-5 leading-relaxed">
+            Si vous souhaitez recevoir un mail de confirmation de votre demande de course.
+            <span className="text-[#091424]/30"> (facultatif)</span>
+          </p>
           <input autoFocus type="email" inputMode="email" value={form.email}
             onChange={e => set("email", e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && emailValid) push("Votre adresse email ?", form.email, "tripType"); }}
+            onKeyDown={e => { if (e.key === "Enter" && canContinue) push("Votre adresse email ?", form.email || "—", "tripType"); }}
             placeholder="exemple@mail.com"
             className={`w-full bg-[#091424]/4 border rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:ring-2 transition-all ${
               form.email && !emailValid ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-[#091424]/10 focus:border-[#1FA3BA] focus:ring-[#1FA3BA]/15"
             }`} />
           {form.email && !emailValid && <p className="text-xs text-red-500 mt-2">Adresse email invalide</p>}
           {emailValid && <p className="text-xs text-[#1FA3BA] mt-2 flex items-center gap-1"><CheckCircle size={12} /> Email vérifié</p>}
-          <div className="flex items-center gap-3 mt-3">
-            <ContinueBtn disabled={!emailValid} onClick={() => push("Votre adresse email ?", form.email, "tripType")} />
-            <button type="button" onClick={() => push("Votre adresse email ?", "—", "tripType")}
-              className="text-xs text-[#091424]/35 hover:text-[#091424]/60 transition-colors underline underline-offset-2">
-              Passer cette étape
-            </button>
+          <div className="flex flex-col gap-2 mt-6">
+            <ContinueBtn
+              disabled={form.email !== "" && !emailValid}
+              onClick={() => push("Votre adresse email ?", form.email || "—", "tripType")}
+              label={form.email === "" ? "Passer" : "Continuer"}
+            />
           </div>
         </>
       );
