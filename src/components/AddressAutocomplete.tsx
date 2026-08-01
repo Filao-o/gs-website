@@ -97,7 +97,7 @@ export default function AddressAutocomplete({
       return;
     }
     serviceRef.current.getPlacePredictions(
-      { input, componentRestrictions: { country: "re" }, types: ["geocode"] },
+      { input, componentRestrictions: { country: "re" } },
       (results, status) => {
         if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
           setPredictions(results as unknown as Prediction[]);
