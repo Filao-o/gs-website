@@ -848,15 +848,15 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
             {(prix.majoration || prix.supplements.length > 0) && (
               <div className="border-t border-white/10 pt-4 flex flex-col gap-2">
                 {prix.majoration && (
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-sm items-center">
                     <span className="text-white/50">{prix.majoration}</span>
                     <span className="text-[#1FA3BA] text-xs font-medium">inclus</span>
                   </div>
                 )}
                 {prix.supplements.map(s => (
-                  <div key={s.label} className="flex justify-between text-sm">
+                  <div key={s.label} className="flex justify-between text-sm items-center">
                     <span className="text-white/50">{s.label}</span>
-                    <span className="text-[#1FA3BA] text-xs font-medium">inclus</span>
+                    <span className="text-[#1FA3BA] text-xs font-medium">+{s.montant} € · inclus</span>
                   </div>
                 ))}
                 <p className="text-white/30 text-xs mt-1 leading-relaxed border-t border-white/8 pt-3">
