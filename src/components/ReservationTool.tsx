@@ -362,6 +362,8 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
           departDatetime: `${departDatetime.date} à ${departDatetime.time}`,
           retourDatetime: form.tripType === "AR" ? `${retourDatetime.date} à ${retourDatetime.time}` : null,
           prix: prix?.prixFinal ?? null,
+          distanceKm: prix?.distanceKm ?? null,
+          dureeMin: prix?.dureeMin ?? null,
         }),
       });
     } catch (e) {
@@ -599,7 +601,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
             onChange={e => set("phone", e.target.value.replace(/[^0-9]/g, ""))}
             onKeyDown={e => {
               const allowed = ["Backspace","Delete","ArrowLeft","ArrowRight","Tab","Enter"];
-              if (e.key === "Enter" && phoneValid) push("À quel numéro pouvons-nous vous joindre ?", `${form.phoneCountry} ${form.phone}`, "tripType");
+              if (e.key === "Enter" && phoneValid) push("À quel numéro pouvons-nous vous joindre ?", `${form.phoneCountry} ${form.phone}`, "email");
               else if (!allowed.includes(e.key) && !/^[0-9]$/.test(e.key)) e.preventDefault();
             }}
             placeholder="0692 XX XX XX"

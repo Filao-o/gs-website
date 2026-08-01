@@ -29,7 +29,7 @@ function emailClient(data: {
   pickup: string; destination: string; tripType: string;
   departDate: string; departTime: string;
   retourDate?: string; retourTime?: string;
-  prix: number;
+  prix: number; distanceKm?: number | null; dureeMin?: number | null;
 }) {
   const tripLabel = data.tripType === "AR" ? "Aller-retour" : "Aller simple";
   const departStr = formatDateFrEmail(data.departDate, data.departTime);
@@ -93,7 +93,8 @@ function emailClient(data: {
             <tr><td style="padding:20px 24px;">
               <p style="margin:0 0 4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.15em;color:rgba(255,255,255,0.5);">Estimation tarifaire</p>
               <p style="margin:0;font-size:36px;font-weight:300;color:#ffffff;">${data.prix} €</p>
-              <p style="margin:6px 0 0;font-size:12px;color:rgba(255,255,255,0.4);">Paiement à bord · Tarif estimatif</p>
+              ${data.distanceKm != null ? `<p style="margin:6px 0 2px;font-size:12px;color:rgba(255,255,255,0.4);">${data.distanceKm} km · ${data.dureeMin} min estimés</p>` : ""}
+              <p style="margin:${data.distanceKm != null ? "2" : "6"}px 0 0;font-size:12px;color:rgba(255,255,255,0.4);">Paiement à bord · Tarif estimatif</p>
             </td></tr>
           </table>
 
@@ -118,7 +119,7 @@ function emailChauffeur(data: {
   pickup: string; destination: string; tripType: string;
   departDate: string; departTime: string;
   retourDate?: string; retourTime?: string;
-  prix: number;
+  prix: number; distanceKm?: number | null; dureeMin?: number | null;
 }) {
   const tripLabel = data.tripType === "AR" ? "Aller-retour" : "Aller simple";
   const departStr = formatDateFrEmail(data.departDate, data.departTime);
@@ -173,6 +174,10 @@ function emailChauffeur(data: {
               <td style="padding:14px 18px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(9,20,36,0.4);">Date retour</td>
               <td style="padding:14px 18px;font-size:14px;font-weight:600;color:#091424;">${retourStr}</td>
             </tr>` : ""}
+            ${data.distanceKm != null ? `<tr style="border-top:1px solid rgba(9,20,36,0.06);">
+              <td style="padding:14px 18px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(9,20,36,0.4);">Distance / Durée</td>
+              <td style="padding:14px 18px;font-size:14px;color:#091424;">${data.distanceKm} km · ${data.dureeMin} min</td>
+            </tr>` : ""}
             <tr style="border-top:1px solid rgba(9,20,36,0.06);background:#091424;">
               <td style="padding:14px 18px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.5);">Estimation</td>
               <td style="padding:14px 18px;font-size:18px;font-weight:300;color:#ffffff;">${data.prix} €</td>
@@ -197,28 +202,40 @@ export async function POST(req: NextRequest) {
       firstName, lastName, phone, email,
       pickup, destination, tripType, vehicle,
       departDatetime, retourDatetime, prix,
+      distanceKm, dureeMin,
     } = body;
 
     // ── Google Calendar ──
     const [departDate, departTime] = departDatetime.split(" à ");
     const [hour, minute] = departTime.split(":");
     const startTime = new Date(`${departDate}T${hour.padStart(2,"0")}:${minute.padStart(2,"0")}:00+04:00`);
-    const endTime   = new Date(startTime.getTime() + 60 * 60 * 1000);
+    const durationMs = dureeMin ? dureeMin * 60 * 1000 : 60 * 60 * 1000;
+    const endTime   = new Date(startTime.getTime() + durationMs);
 
     const vehicleLabel = vehicle === "suv" ? "SUV Premium 4 places" : "Van Premium 8 places";
     const tripLabel    = tripType === "AR" ? "Aller-retour" : "Aller simple";
+    const distanceInfo = distanceKm != null ? `\n📏 Distance : ${distanceKm} km · ${dureeMin} min` : "";
 
-    let description = `👤 Client : ${firstName} ${lastName}\n📞 Téléphone : ${phone}\n📧 Email : ${email}\n\n🚗 Type : ${tripLabel}\n🚙 Véhicule : ${vehicleLabel}\n\n📍 Départ : ${pickup}\n🏁 Destination : ${destination}\n\n💶 Estimation : ${prix} €`;
+    let description = `👤 Client : ${firstName} ${lastName}\n📞 Téléphone : ${phone}\n📧 Email : ${email}\n\n🚗 Type : ${tripLabel}\n🚙 Véhicule : ${vehicleLabel}\n\n📍 Départ : ${pickup}\n🏁 Destination : ${destination}${distanceInfo}\n\n💶 Estimation : ${prix} €`;
     if (tripType === "AR" && retourDatetime) description += `\n\n🔄 Retour : ${retourDatetime}`;
 
     await calendar.events.insert({
       calendarId: "primary",
+      sendUpdates: "all",
       requestBody: {
         summary: `🚗 Course GS Transport — ${firstName} ${lastName}`,
         description,
         start: { dateTime: startTime.toISOString(), timeZone: "Indian/Reunion" },
         end:   { dateTime: endTime.toISOString(),   timeZone: "Indian/Reunion" },
         colorId: "7",
+        attendees: [{ email: CHAUFFEUR_EMAIL }],
+        reminders: {
+          useDefault: false,
+          overrides: [
+            { method: "popup", minutes: 60 },
+            { method: "popup", minutes: 15 },
+          ],
+        },
       },
     });
 
@@ -230,7 +247,7 @@ export async function POST(req: NextRequest) {
       pickup, destination, tripType,
       departDate, departTime,
       retourDate, retourTime,
-      prix,
+      prix, distanceKm, dureeMin,
     };
 
     await Promise.all([
