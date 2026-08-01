@@ -710,7 +710,14 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
         )}
         {showReturnPickup && (
           <div className="mt-4">
-            <p className="text-xs font-medium text-[#091424]/50 uppercase tracking-wide mb-3">Prise en charge retour</p>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-medium text-[#091424]/50 uppercase tracking-wide">Prise en charge retour</p>
+              <button type="button"
+                onClick={() => { setShowReturnPickup(false); set("returnPickup", ""); setReturnPickupValid(false); }}
+                className="w-6 h-6 flex items-center justify-center rounded-full bg-[#091424]/6 hover:bg-red-50 text-[#091424]/40 hover:text-red-400 transition-colors text-sm leading-none">
+                ×
+              </button>
+            </div>
             <AddressAutocomplete label="" value={form.returnPickup} onChange={v => set("returnPickup", v)} onValidated={setReturnPickupValid}
               placeholder="Ex : Centre commercial, Saint-Paul" showGeolocate />
           </div>
