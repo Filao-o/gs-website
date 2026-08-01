@@ -121,7 +121,6 @@ export default function AddressAutocomplete({
 
   const selectPrediction = (pred: Prediction) => {
     if (!placesRef.current) return;
-    selectingRef.current = true;
     placesRef.current.getDetails(
       { placeId: pred.place_id, fields: ["formatted_address"] },
       (place, status) => {
@@ -130,7 +129,6 @@ export default function AddressAutocomplete({
           onChange(place.formatted_address);
           markValid(true);
         } else {
-          // Fallback to description
           if (inputRef.current) inputRef.current.value = pred.description;
           onChange(pred.description);
           markValid(true);
@@ -138,7 +136,6 @@ export default function AddressAutocomplete({
         setPredictions([]);
         setOpen(false);
         setError(null);
-        selectingRef.current = false;
       }
     );
   };
