@@ -396,6 +396,10 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
   useEffect(() => {
     if (step === "intro") return;
     containerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (step === "returnDestination" && !form.returnDestination && form.pickup) {
+      setForm(f => ({ ...f, returnDestination: f.pickup }));
+      setReturnDestinationValid(true);
+    }
   }, [step]);
 
   const heureDepart = parseInt(departDatetime.time.split(":")[0], 10);
