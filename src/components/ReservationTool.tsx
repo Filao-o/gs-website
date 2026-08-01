@@ -306,8 +306,8 @@ type StepId =
 interface ThreadEntry { question: string; answer: string; }
 
 /* ─── Progress steps ─── */
-const STEPS_AS: StepId[] = ["firstName","lastName","phone","email","tripType","pickup","destination","datetime","price"];
-const STEPS_AR: StepId[] = ["firstName","lastName","phone","email","tripType","pickup","datetime","destination","returnDestination","retourDatetime","price"];
+const STEPS_AS: StepId[] = ["firstName","lastName","phone","tripType","pickup","destination","datetime","price"];
+const STEPS_AR: StepId[] = ["firstName","lastName","phone","tripType","pickup","datetime","destination","returnDestination","retourDatetime","price"];
 
 /* ─── Continue button ─── */
 function ContinueBtn({ onClick, disabled = false, label = "Continuer" }: { onClick: () => void; disabled?: boolean; label?: string }) {
@@ -601,7 +601,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
             onChange={e => set("phone", e.target.value.replace(/[^0-9]/g, ""))}
             onKeyDown={e => {
               const allowed = ["Backspace","Delete","ArrowLeft","ArrowRight","Tab","Enter"];
-              if (e.key === "Enter" && phoneValid) push("À quel numéro pouvons-nous vous joindre ?", `${form.phoneCountry} ${form.phone}`, "email");
+              if (e.key === "Enter" && phoneValid) push("À quel numéro pouvons-nous vous joindre ?", `${form.phoneCountry} ${form.phone}`, "tripType");
               else if (!allowed.includes(e.key) && !/^[0-9]$/.test(e.key)) e.preventDefault();
             }}
             placeholder="0692 XX XX XX"
@@ -615,40 +615,9 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
         {phoneValid && (
           <p className="text-xs text-[#1FA3BA] mt-2 flex items-center gap-1"><CheckCircle size={12} /> Numéro vérifié</p>
         )}
-        <ContinueBtn disabled={!phoneValid} onClick={() => push("À quel numéro pouvons-nous vous joindre ?", `${form.phoneCountry} ${form.phone}`, "email")} />
+        <ContinueBtn disabled={!phoneValid} onClick={() => push("À quel numéro pouvons-nous vous joindre ?", `${form.phoneCountry} ${form.phone}`, "tripType")} />
       </>
     );
-
-    // ── Email (facultatif) ──
-    if (step === "email") {
-      const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
-      const canContinue = emailValid || form.email === "";
-      return (
-        <>
-          <Question text="Votre adresse email ?" />
-          <p className="text-[#091424]/50 text-sm -mt-4 mb-5 leading-relaxed">
-            Si vous souhaitez recevoir un mail de confirmation de votre demande de course.
-            <span className="text-[#091424]/30"> (facultatif)</span>
-          </p>
-          <input autoFocus type="email" inputMode="email" value={form.email}
-            onChange={e => set("email", e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && canContinue) push("Votre adresse email ?", form.email || "—", "tripType"); }}
-            placeholder="exemple@mail.com"
-            className={`w-full bg-[#091424]/4 border rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:ring-2 transition-all ${
-              form.email && !emailValid ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-[#091424]/10 focus:border-[#1FA3BA] focus:ring-[#1FA3BA]/15"
-            }`} />
-          {form.email && !emailValid && <p className="text-xs text-red-500 mt-2">Adresse email invalide</p>}
-          {emailValid && <p className="text-xs text-[#1FA3BA] mt-2 flex items-center gap-1"><CheckCircle size={12} /> Email vérifié</p>}
-          <div className="flex flex-col gap-2 mt-6">
-            <ContinueBtn
-              disabled={form.email !== "" && !emailValid}
-              onClick={() => push("Votre adresse email ?", form.email || "—", "tripType")}
-              label={form.email === "" ? "Passer" : "Continuer"}
-            />
-          </div>
-        </>
-      );
-    }
 
     // ── Type de trajet ──
     if (step === "tripType") return (
@@ -869,15 +838,46 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
           </div>
         )}
 
-        {prix && !loading && (
-          <>
-            <div className="flex items-center gap-3 bg-[#1FA3BA]/8 border border-[#1FA3BA]/20 rounded-xl px-4 py-3 mb-2">
-              <CheckCircle size={15} className="text-[#1FA3BA] shrink-0" />
-              <p className="text-sm text-[#091424]/70">Paiement directement auprès du chauffeur à bord.</p>
-            </div>
-            <ContinueBtn label="Envoyer ma demande" onClick={() => { setConfirmed(true); createCalendarEvent(); }} />
-          </>
-        )}
+        {prix && !loading && (() => {
+          const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
+          return (
+            <>
+              {/* Champ email facultatif */}
+              <div className="mb-4">
+                <p className="text-sm text-[#091424]/60 mb-1 leading-relaxed">
+                  Recevoir un mail de confirmation ?
+                  <span className="text-[#091424]/30"> (facultatif)</span>
+                </p>
+                <input
+                  type="email"
+                  inputMode="email"
+                  value={form.email}
+                  onChange={e => set("email", e.target.value)}
+                  placeholder="exemple@mail.com"
+                  className={`w-full bg-[#091424]/4 border rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:ring-2 transition-all ${
+                    form.email && !emailValid
+                      ? "border-red-300 focus:border-red-400 focus:ring-red-100"
+                      : emailValid
+                      ? "border-[#1FA3BA]/50 focus:border-[#1FA3BA] focus:ring-[#1FA3BA]/15"
+                      : "border-[#091424]/10 focus:border-[#1FA3BA] focus:ring-[#1FA3BA]/15"
+                  }`}
+                />
+                {form.email && !emailValid && <p className="text-xs text-red-500 mt-1.5">Adresse email invalide</p>}
+                {emailValid && <p className="text-xs text-[#1FA3BA] mt-1.5 flex items-center gap-1"><CheckCircle size={12} /> Email vérifié</p>}
+              </div>
+
+              <div className="flex items-center gap-3 bg-[#1FA3BA]/8 border border-[#1FA3BA]/20 rounded-xl px-4 py-3 mb-2">
+                <CheckCircle size={15} className="text-[#1FA3BA] shrink-0" />
+                <p className="text-sm text-[#091424]/70">Paiement directement auprès du chauffeur à bord.</p>
+              </div>
+              <ContinueBtn
+                label="Envoyer ma demande"
+                disabled={form.email !== "" && !emailValid}
+                onClick={() => { setConfirmed(true); createCalendarEvent(); }}
+              />
+            </>
+          );
+        })()}
       </>
     );
 
@@ -906,7 +906,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
               const prev = thread[thread.length - 1];
               if (!prev) { setStep("intro"); return; }
               setThread(t => t.slice(0,-1));
-              const steps: StepId[] = ["firstName","lastName","phone","email","tripType","pickup","datetime","destination","returnDestination","retourDatetime","price"];
+              const steps: StepId[] = ["firstName","lastName","phone","tripType","pickup","datetime","destination","returnDestination","retourDatetime","price"];
               const idx = steps.indexOf(step as StepId);
               setStep(idx > 0 ? steps[idx-1] : "intro");
             }} className="flex items-center gap-2 text-sm font-medium text-[#091424]/70 hover:text-[#091424] transition-colors mb-8 border border-[#091424]/10 hover:border-[#091424]/25 rounded-full px-4 py-2 w-fit">
