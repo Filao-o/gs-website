@@ -200,75 +200,76 @@ function DateTimePicker({ value, onChange }: { value: { date: string; time: stri
 
   return (
     <div className="rounded-2xl border border-[#091424]/10 overflow-hidden bg-[#091424]/4">
-      <div className="flex divide-x divide-[#091424]/8" style={{ minHeight: 280 }}>
-        {/* Calendar */}
-        <div className="flex-1 p-4">
-          <div className="flex items-center justify-between mb-4">
-            <button onClick={prevMonth} disabled={!canGoPrev} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[#091424]/6 transition-colors disabled:opacity-20">
-              <ArrowLeft size={14} className="text-[#091424]" />
-            </button>
-            <span className="text-sm font-medium text-[#091424]">{MOIS_FR[calMonth]} {calYear}</span>
-            <button onClick={nextMonth} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[#091424]/6 transition-colors">
-              <ArrowRight size={14} className="text-[#091424]" />
-            </button>
-          </div>
-          <div className="grid grid-cols-7 mb-1">
-            {JOURS_FR.map(j => <div key={j} className="text-center text-[10px] font-medium text-[#091424]/40 py-1">{j}</div>)}
-          </div>
-          <div className="grid grid-cols-7 gap-y-0.5">
-            {cells.map((day, i) => {
-              if (!day) return <div key={`e-${i}`} />;
-              const past = isPast(day); const sel = isSelected(day);
-              return (
-                <button key={day} onClick={() => selectDay(day)} disabled={past}
-                  className={`aspect-square w-full max-w-[36px] mx-auto flex items-center justify-center rounded-full text-xs transition-all font-medium ${
-                    sel
-                      ? "bg-[#091424] text-white"
-                      : past
-                      ? "bg-[#091424]/6 text-[#091424]/25 cursor-not-allowed"
-                      : "text-[#091424] hover:bg-[#091424]/8"
-                  }`}>
-                  {day}
-                </button>
-              );
-            })}
-          </div>
-        </div>
 
-        {/* Time panel */}
-        <div className="w-28 flex flex-col">
-          {/* Manual input */}
-          <div className="px-3 py-2 border-b border-[#091424]/8 bg-white">
-            <input
-              type="text"
-              value={manualTime}
-              onChange={e => handleManualTimeChange(e.target.value)}
-              onBlur={handleManualBlur}
-              placeholder="09:00"
-              maxLength={5}
-              className="w-full text-center text-sm font-medium text-[#091424] placeholder-[#091424]/25 bg-transparent outline-none"
-            />
-          </div>
-          {/* Slots list */}
-          <div ref={timeListRef} className="flex-1 overflow-y-auto" style={{ maxHeight: 248 }}>
-            {TIME_SLOTS.map(slot => {
-              const reunionTime = isLocalTz ? slot : toRéunionTime(slot, tz.offset);
-              const sel = reunionTime === value.time;
-              return (
-                <button key={slot} data-selected={sel} onClick={() => { onChange({ ...value, time: reunionTime }); setManualTime(reunionTime); }}
-                  className={`w-full px-3 py-2.5 text-sm font-medium text-center transition-all ${
-                    sel ? "bg-white text-[#091424] shadow-sm" : "text-[#091424]/60 hover:bg-[#091424]/5 hover:text-[#091424]"
-                  }`}>
-                  {slot}
-                </button>
-              );
-            })}
-          </div>
+      {/* ── Calendrier ── */}
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-4">
+          <button onClick={prevMonth} disabled={!canGoPrev} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[#091424]/6 transition-colors disabled:opacity-20">
+            <ArrowLeft size={14} className="text-[#091424]" />
+          </button>
+          <span className="text-sm font-medium text-[#091424]">{MOIS_FR[calMonth]} {calYear}</span>
+          <button onClick={nextMonth} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[#091424]/6 transition-colors">
+            <ArrowRight size={14} className="text-[#091424]" />
+          </button>
+        </div>
+        <div className="grid grid-cols-7 mb-1">
+          {JOURS_FR.map(j => <div key={j} className="text-center text-[10px] font-medium text-[#091424]/40 py-1">{j}</div>)}
+        </div>
+        <div className="grid grid-cols-7 gap-y-0.5">
+          {cells.map((day, i) => {
+            if (!day) return <div key={`e-${i}`} />;
+            const past = isPast(day); const sel = isSelected(day);
+            return (
+              <button key={day} onClick={() => selectDay(day)} disabled={past}
+                className={`aspect-square w-full max-w-[36px] mx-auto flex items-center justify-center rounded-full text-xs transition-all font-medium ${
+                  sel
+                    ? "bg-[#091424] text-white"
+                    : past
+                    ? "bg-[#091424]/6 text-[#091424]/25 cursor-not-allowed"
+                    : "text-[#091424] hover:bg-[#091424]/8"
+                }`}>
+                {day}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Timezone + summary */}
-      <div className="border-t border-[#091424]/8 px-4 py-3 bg-white flex items-center justify-between gap-3 flex-wrap">
+      {/* ── Heure ── */}
+      <div className="border-t border-[#091424]/8 bg-white">
+        {/* Saisie manuelle */}
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-[#091424]/6">
+          <span className="text-xs font-medium text-[#091424]/50 shrink-0">Heure</span>
+          <input
+            type="text"
+            value={manualTime}
+            onChange={e => handleManualTimeChange(e.target.value)}
+            onBlur={handleManualBlur}
+            placeholder="09:00"
+            maxLength={5}
+            className="text-sm font-semibold text-[#091424] placeholder-[#091424]/25 bg-transparent outline-none w-16"
+          />
+        </div>
+        {/* Créneaux défilables horizontalement */}
+        <div ref={timeListRef} className="flex overflow-x-auto gap-1.5 px-4 py-3 scrollbar-none">
+          {TIME_SLOTS.map(slot => {
+            const reunionTime = isLocalTz ? slot : toRéunionTime(slot, tz.offset);
+            const sel = reunionTime === value.time;
+            return (
+              <button key={slot} data-selected={sel}
+                onClick={() => { onChange({ ...value, time: reunionTime }); setManualTime(reunionTime); }}
+                className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  sel ? "bg-[#091424] text-white" : "bg-[#091424]/6 text-[#091424]/60 hover:bg-[#091424]/10 hover:text-[#091424]"
+                }`}>
+                {slot}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Fuseau + résumé ── */}
+      <div className="border-t border-[#091424]/8 px-4 py-3 bg-[#091424]/2 flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-xs font-semibold text-[#091424]/50 shrink-0">Fuseau :</span>
           <select value={tzId} onChange={e => setTzId(e.target.value)}
@@ -393,6 +394,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
   const set = (key: keyof FormData, val: unknown) => setForm(f => ({ ...f, [key]: val }));
 
   useEffect(() => {
+    if (step === "intro") return;
     containerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [step]);
 
@@ -409,6 +411,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
   })();
 
   const push = useCallback((question: string, answer: string, next: StepId) => {
+    (document.activeElement as HTMLElement)?.blur();
     setThread(t => [...t, { question, answer }]);
     setStep(next);
   }, []);
