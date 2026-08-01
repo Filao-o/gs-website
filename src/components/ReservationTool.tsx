@@ -19,6 +19,7 @@ interface FormData {
   lastName:           string;
   phoneCountry:       string;
   phone:              string;
+  email:              string;
   tripType:           TripType;
   vehicle:            Vehicle;
   pickup:             string;
@@ -31,7 +32,7 @@ interface FormData {
 }
 
 const INITIAL: FormData = {
-  firstName: "", lastName: "", phoneCountry: "+262", phone: "",
+  firstName: "", lastName: "", phoneCountry: "+262", phone: "", email: "",
   tripType: null, vehicle: "suv",
   pickup: "", destination: "", returnPickup: "", returnDestination: "",
   customDescription: "", customName: "", customPhone: "",
@@ -293,7 +294,7 @@ function DateTimePicker({ value, onChange }: { value: { date: string; time: stri
 /* ─── Step IDs ─── */
 type StepId =
   | "intro"
-  | "firstName" | "lastName" | "phone"
+  | "firstName" | "lastName" | "phone" | "email"
   | "tripType" | "vehicle"
   | "pickup" | "destination"
   | "returnDestination" | "returnPickup"
@@ -305,8 +306,8 @@ type StepId =
 interface ThreadEntry { question: string; answer: string; }
 
 /* ─── Progress steps ─── */
-const STEPS_AS: StepId[] = ["firstName","lastName","phone","tripType","pickup","destination","datetime","price"];
-const STEPS_AR: StepId[] = ["firstName","lastName","phone","tripType","pickup","datetime","destination","returnDestination","retourDatetime","price"];
+const STEPS_AS: StepId[] = ["firstName","lastName","phone","email","tripType","pickup","destination","datetime","price"];
+const STEPS_AR: StepId[] = ["firstName","lastName","phone","email","tripType","pickup","datetime","destination","returnDestination","retourDatetime","price"];
 
 /* ─── Continue button ─── */
 function ContinueBtn({ onClick, disabled = false, label = "Continuer" }: { onClick: () => void; disabled?: boolean; label?: string }) {
@@ -353,6 +354,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
           firstName: form.firstName,
           lastName: form.lastName,
           phone: `${form.phoneCountry} ${form.phone}`,
+          email: form.email,
           pickup: form.pickup,
           destination: form.destination,
           tripType: form.tripType,
@@ -611,9 +613,36 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
         {phoneValid && (
           <p className="text-xs text-[#1FA3BA] mt-2 flex items-center gap-1"><CheckCircle size={12} /> Numéro vérifié</p>
         )}
-        <ContinueBtn disabled={!phoneValid} onClick={() => push("À quel numéro pouvons-nous vous joindre ?", `${form.phoneCountry} ${form.phone}`, "tripType")} />
+        <ContinueBtn disabled={!phoneValid} onClick={() => push("À quel numéro pouvons-nous vous joindre ?", `${form.phoneCountry} ${form.phone}`, "email")} />
       </>
     );
+
+    // ── Email ──
+    if (step === "email") {
+      const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
+      return (
+        <>
+          <Question text="Votre adresse email ?" />
+          <p className="text-[#091424]/40 text-xs mb-4 -mt-4">Pour recevoir la confirmation de votre réservation.</p>
+          <input autoFocus type="email" inputMode="email" value={form.email}
+            onChange={e => set("email", e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && emailValid) push("Votre adresse email ?", form.email, "tripType"); }}
+            placeholder="exemple@mail.com"
+            className={`w-full bg-[#091424]/4 border rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:ring-2 transition-all ${
+              form.email && !emailValid ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-[#091424]/10 focus:border-[#1FA3BA] focus:ring-[#1FA3BA]/15"
+            }`} />
+          {form.email && !emailValid && <p className="text-xs text-red-500 mt-2">Adresse email invalide</p>}
+          {emailValid && <p className="text-xs text-[#1FA3BA] mt-2 flex items-center gap-1"><CheckCircle size={12} /> Email vérifié</p>}
+          <div className="flex items-center gap-3 mt-3">
+            <ContinueBtn disabled={!emailValid} onClick={() => push("Votre adresse email ?", form.email, "tripType")} />
+            <button type="button" onClick={() => push("Votre adresse email ?", "—", "tripType")}
+              className="text-xs text-[#091424]/35 hover:text-[#091424]/60 transition-colors underline underline-offset-2">
+              Passer cette étape
+            </button>
+          </div>
+        </>
+      );
+    }
 
     // ── Type de trajet ──
     if (step === "tripType") return (
@@ -863,7 +892,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
               const prev = thread[thread.length - 1];
               if (!prev) { setStep("intro"); return; }
               setThread(t => t.slice(0,-1));
-              const steps: StepId[] = ["firstName","lastName","phone","tripType","pickup","datetime","destination","returnDestination","retourDatetime","price"];
+              const steps: StepId[] = ["firstName","lastName","phone","email","tripType","pickup","datetime","destination","returnDestination","retourDatetime","price"];
               const idx = steps.indexOf(step as StepId);
               setStep(idx > 0 ? steps[idx-1] : "intro");
             }} className="flex items-center gap-2 text-sm font-medium text-[#091424]/70 hover:text-[#091424] transition-colors mb-8 border border-[#091424]/10 hover:border-[#091424]/25 rounded-full px-4 py-2 w-fit">
