@@ -55,7 +55,7 @@ export default function AddressAutocomplete({
   const placesRef       = useRef<google.maps.places.PlacesService | null>(null);
   const dummyRef        = useRef<HTMLDivElement>(null);
   const containerRef    = useRef<HTMLDivElement>(null);
-  const selectingRef    = useRef(false);
+  const validatedRef    = useRef(!!value);
 
   const [ready,       setReady]       = useState(false);
   const [validated,   setValidated]   = useState(!!value);
@@ -74,6 +74,7 @@ export default function AddressAutocomplete({
   }, []);
 
   const markValid = useCallback((val: boolean) => {
+    validatedRef.current = val;
     setValidated(val);
     onValidated?.(val);
   }, [onValidated]);
@@ -144,7 +145,7 @@ export default function AddressAutocomplete({
 
   const handleBlur = () => {
     setTimeout(() => {
-      if (!validated && !selectingRef.current && inputRef.current?.value) {
+      if (!validatedRef.current && inputRef.current?.value) {
         setError("Veuillez sélectionner une adresse dans la liste");
       }
     }, 300);
