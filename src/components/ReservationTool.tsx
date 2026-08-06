@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   ArrowRight, ArrowLeft, Car, Phone, MapPin,
-  Calendar, CheckCircle, Clock, ChevronRight, Loader2, Users
+  Calendar, CheckCircle, Clock, ChevronRight, Loader2, Users, Wind, Droplets
 } from "lucide-react";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { calculerPrix, type PrixResult } from "@/lib/pricing";
@@ -506,6 +506,24 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
           </div>
           <p className="text-xs text-[#091424]/30 mt-4">Contacter le chauffeur directement pour un besoin spécifique.</p>
           <p className="text-xs text-[#091424]/25 mt-1">Prend moins de 2 minutes · Paiement à bord</p>
+
+          {/* Présentation véhicule */}
+          <div className="mt-6 pt-6 border-t border-[#091424]/6">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#091424]/35 mb-3">Votre véhicule</p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { icon: <Users size={12} />, label: "4 passagers" },
+                { icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="13" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>, label: "4 valises standard" },
+                { icon: <Wind size={12} />, label: "Climatisé" },
+                { icon: <Droplets size={12} />, label: "Eau offerte" },
+              ].map(({ icon, label }) => (
+                <span key={label} className="flex items-center gap-1.5 text-xs text-[#091424]/55 bg-[#091424]/4 rounded-full px-3 py-1.5">
+                  <span className="text-[#1FA3BA]">{icon}</span>
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

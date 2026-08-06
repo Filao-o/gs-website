@@ -99,7 +99,7 @@ function emailClient(data: {
           </table>
 
           <p style="margin:0 0 8px;font-size:13px;color:rgba(9,20,36,0.5);line-height:1.6;">Des questions ? Contactez Sébastien directement :</p>
-          <p style="margin:0;font-size:15px;font-weight:500;color:#1FA3BA;">📞 +262 692 XX XX XX</p>
+          <p style="margin:0;font-size:15px;font-weight:500;color:#1FA3BA;">📞 +262 693 51 22 82</p>
         </td></tr>
 
         <!-- Footer -->
@@ -255,6 +255,7 @@ export async function POST(req: NextRequest) {
       resend.emails.send({
         from: FROM_EMAIL,
         to: CHAUFFEUR_EMAIL,
+        reply_to: email || undefined,
         subject: `🚗 Nouvelle réservation — ${firstName} ${lastName} · ${departDatetime}`,
         html: emailChauffeur(emailData),
       }),
@@ -262,6 +263,7 @@ export async function POST(req: NextRequest) {
       ...(email ? [resend.emails.send({
         from: FROM_EMAIL,
         to: email,
+        reply_to: CHAUFFEUR_EMAIL,
         subject: `Votre demande de réservation GS Transport — ${departDatetime}`,
         html: emailClient(emailData),
       })] : []),
