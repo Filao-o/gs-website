@@ -12,7 +12,7 @@ export default function CGU() {
       <Link href="/" className="text-sm text-[#1FA3BA] hover:underline mb-8 inline-block">← Retour à l'accueil</Link>
 
       <h1 className="font-heading text-[#091424] text-3xl font-light mb-2">Conditions générales d'utilisation</h1>
-      <p className="text-sm text-[#091424]/40 mb-10">Dernière mise à jour : [DATE]</p>
+      <p className="text-sm text-[#091424]/40 mb-10">Mise à jour : 6 août 2026</p>
 
       <section className="prose prose-sm max-w-none text-[#091424]/70 space-y-8">
 
@@ -29,7 +29,7 @@ export default function CGU() {
           <p>
             GS Transport propose un service de transport privé avec chauffeur (VTC) sur l'île de La Réunion.
             Le site permet d'obtenir une estimation tarifaire et d'envoyer une demande de réservation.
-            La réservation n'est effective qu'après confirmation téléphonique ou écrite du chauffeur.
+            La réservation n'est effective qu'après confirmation téléphonique du chauffeur.
           </p>
         </div>
 
@@ -46,9 +46,9 @@ export default function CGU() {
         <div>
           <h2 className="text-[#091424] font-semibold text-base mb-3">4. Demande de réservation</h2>
           <p>
-            Le formulaire de réservation est une demande, non un contrat. GS Transport se réserve le droit
-            de refuser ou de modifier une demande (indisponibilité, zone non couverte, etc.).
-            Le client sera contacté par téléphone dans les meilleurs délais pour confirmation.
+            Le formulaire de réservation constitue une demande, non un contrat. GS Transport se réserve le droit
+            de refuser ou de modifier une demande en cas d'indisponibilité ou de zone non couverte.
+            Le client sera contacté par téléphone pour confirmation.
           </p>
         </div>
 
@@ -56,24 +56,21 @@ export default function CGU() {
           <h2 className="text-[#091424] font-semibold text-base mb-3">5. Paiement</h2>
           <p>
             Le paiement s'effectue <strong>directement auprès du chauffeur à bord</strong>, à l'issue de la course.
-            Les moyens de paiement acceptés sont : [ESPÈCES / CB / VIREMENT — À COMPLÉTER].
           </p>
         </div>
 
         <div>
           <h2 className="text-[#091424] font-semibold text-base mb-3">6. Annulation</h2>
           <p>
-            Toute annulation doit être signalée au chauffeur par téléphone au <strong>+262 693 51 22 82</strong>{" "}
-            dans un délai de [X] heures avant la course. [CONDITIONS D'ANNULATION À PRÉCISER].
+            Toute annulation doit être signalée au chauffeur directement par téléphone au{" "}
+            <a href="tel:+262693512282" className="text-[#1FA3BA] hover:underline">+262 693 51 22 82</a>.
           </p>
         </div>
 
         <div>
           <h2 className="text-[#091424] font-semibold text-base mb-3">7. Responsabilité</h2>
           <p>
-            GS Transport est assuré pour le transport de personnes à titre onéreux.
-            Numéro de police d'assurance : [NUMÉRO POLICE D'ASSURANCE].
-            L'assureur est : [NOM DE L'ASSURANCE].
+            GS Transport est assuré pour le transport de personnes à titre onéreux conformément à la réglementation VTC en vigueur.
           </p>
         </div>
 
@@ -81,7 +78,7 @@ export default function CGU() {
           <h2 className="text-[#091424] font-semibold text-base mb-3">8. Droit applicable</h2>
           <p>
             Les présentes CGU sont soumises au droit français. En cas de litige, les tribunaux compétents
-            sont ceux de [VILLE — ex : Saint-Denis de La Réunion].
+            sont ceux de Saint-Denis de La Réunion.
           </p>
         </div>
 

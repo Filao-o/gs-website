@@ -12,15 +12,16 @@ export default function Confidentialite() {
       <Link href="/" className="text-sm text-[#1FA3BA] hover:underline mb-8 inline-block">← Retour à l'accueil</Link>
 
       <h1 className="font-heading text-[#091424] text-3xl font-light mb-2">Politique de confidentialité</h1>
-      <p className="text-sm text-[#091424]/40 mb-10">Dernière mise à jour : [DATE]</p>
+      <p className="text-sm text-[#091424]/40 mb-10">Mise à jour : 6 août 2026</p>
 
       <section className="prose prose-sm max-w-none text-[#091424]/70 space-y-8">
 
         <div>
           <h2 className="text-[#091424] font-semibold text-base mb-3">1. Responsable du traitement</h2>
           <p>
-            [PRÉNOM NOM], auto-entrepreneur, SIRET [NUMÉRO SIRET], domicilié [ADRESSE], La Réunion.<br />
-            Contact : gstransport974@gmail.com · +262 693 51 22 82
+            Gambier Sébastien, auto-entrepreneur, SIREN 914 900 360.<br />
+            37 A Rue de l'Église du Guillaume, 97423 Saint-Paul, La Réunion.<br />
+            Contact : <a href="mailto:gstransport974@gmail.com" className="text-[#1FA3BA] hover:underline">gstransport974@gmail.com</a> · +262 693 51 22 82
           </p>
         </div>
 
@@ -46,7 +47,7 @@ export default function Confidentialite() {
             <li>Traitement et confirmation de votre demande de réservation</li>
             <li>Envoi d'un email de confirmation (si email fourni)</li>
             <li>Gestion du planning du chauffeur via Google Calendar</li>
-            <li>Contact téléphonique pour confirmer ou modifier la course</li>
+            <li>Contact téléphonique pour confirmer la course</li>
           </ul>
         </div>
 
@@ -72,8 +73,8 @@ export default function Confidentialite() {
         <div>
           <h2 className="text-[#091424] font-semibold text-base mb-3">6. Durée de conservation</h2>
           <p>
-            Vos données sont conservées le temps nécessaire à la réalisation du trajet, puis archivées
-            pendant <strong>[X] an(s)</strong> pour les obligations comptables et légales.
+            Les données de réservation sont conservées dans Google Calendar pour permettre la gestion
+            du planning du chauffeur. Elles peuvent être supprimées à tout moment sur simple demande.
           </p>
         </div>
 

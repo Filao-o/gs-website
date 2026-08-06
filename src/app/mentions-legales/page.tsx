@@ -19,10 +19,10 @@ export default function MentionsLegales() {
           <h2 className="text-[#091424] font-semibold text-base mb-3">1. Éditeur du site</h2>
           <p>Le site <strong>gstransport.re</strong> est édité par :</p>
           <ul className="mt-2 space-y-1">
-            <li><strong>Nom :</strong> [PRÉNOM NOM DU CHAUFFEUR]</li>
-            <li><strong>Forme juridique :</strong> Auto-entrepreneur / [FORME JURIDIQUE]</li>
-            <li><strong>SIRET :</strong> [NUMÉRO SIRET]</li>
-            <li><strong>Adresse :</strong> [ADRESSE COMPLÈTE], La Réunion</li>
+            <li><strong>Nom :</strong> Gambier Sébastien</li>
+            <li><strong>Forme juridique :</strong> Auto-entrepreneur</li>
+            <li><strong>SIREN :</strong> 914 900 360</li>
+            <li><strong>Adresse :</strong> 37 A Rue de l'Église du Guillaume, 97423 Saint-Paul, La Réunion</li>
             <li><strong>Téléphone :</strong> +262 693 51 22 82</li>
             <li><strong>Email :</strong> gstransport974@gmail.com</li>
           </ul>
@@ -31,13 +31,9 @@ export default function MentionsLegales() {
         <div>
           <h2 className="text-[#091424] font-semibold text-base mb-3">2. Activité réglementée</h2>
           <p>
-            GS Transport exerce une activité de Voiture de Tourisme avec Chauffeur (VTC) soumise à autorisation préfectorale.
+            GS Transport exerce une activité de Voiture de Tourisme avec Chauffeur (VTC)
+            soumise à réglementation. L'autorisation d'exercer est directement liée au SIREN 914 900 360.
           </p>
-          <ul className="mt-2 space-y-1">
-            <li><strong>Carte professionnelle VTC n° :</strong> [NUMÉRO CARTE PRO]</li>
-            <li><strong>Autorisation délivrée par :</strong> Préfecture de La Réunion</li>
-            <li><strong>Numéro d'inscription au registre VTC :</strong> [NUMÉRO REGISTRE]</li>
-          </ul>
         </div>
 
         <div>
@@ -60,8 +56,9 @@ export default function MentionsLegales() {
         <div>
           <h2 className="text-[#091424] font-semibold text-base mb-3">5. Responsabilité</h2>
           <p>
-            Les tarifs affichés sur ce site sont des estimations. GS Transport ne saurait être tenu responsable
-            d'une différence entre l'estimation en ligne et le tarif final, qui peut varier selon les conditions réelles du trajet.
+            Les tarifs affichés sur ce site sont des estimations indicatives et non contractuelles.
+            GS Transport ne saurait être tenu responsable d'une différence entre l'estimation en ligne
+            et le tarif final, qui peut varier selon les conditions réelles du trajet.
           </p>
         </div>
 

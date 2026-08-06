@@ -555,6 +555,10 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
             </div>
           ))}
         </div>
+        <p className="text-xs text-[#091424]/30 mb-6 leading-relaxed">
+          Pour annuler ou modifier votre course, appelez directement Sébastien au{" "}
+          <a href="tel:+262693512282" className="text-[#091424]/50 hover:text-[#1FA3BA] transition-colors">+262 693 51 22 82</a>.
+        </p>
         <button onClick={() => { setStep("intro"); setForm(INITIAL); setThread([]); setPrix(null); setConfirmed(false); }}
           className="text-[#091424]/40 hover:text-[#091424] text-sm transition-colors">
           Faire une nouvelle réservation
