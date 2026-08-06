@@ -5,35 +5,45 @@ import matter from "gray-matter";
 const BLOG_DIR  = path.join(process.cwd(), "src/content/blog");
 const PUBLIC_DIR = path.join(process.cwd(), "public");
 
+const CAT = "/Blog/categories";
+
 // Image de fallback par catégorie
 const CATEGORY_HERO: Record<string, string> = {
-  "Pratique":    "/Blog/categories/aeroport.jpg",
-  "Conseils":    "/Blog/categories/suv-premium.jpg",
-  "Pro":         "/Blog/categories/pro-bureau.jpg",
-  "Événements":  "/Blog/categories/soiree.jpg",
-  "Zones":       "/Blog/categories/route-reunion.jpg",
+  "Pratique":   `${CAT}/route-littoral-ile-de-la-reunion.jpg`,
+  "Conseils":   `${CAT}/coucher-soleil-ile-de-la-reunion.jpg`,
+  "Pro":        `${CAT}/route-ile-de-la-reunion.jpg`,
+  "Événements": `${CAT}/restaurant-ile-de-la-reunion.jpg`,
+  "Zones":      `${CAT}/route-littoral-ile-de-la-reunion.jpg`,
 };
 
-// Surcharges par slug pour les articles qui méritent une image spécifique
+// Surcharges par slug
 const SLUG_HERO_OVERRIDE: Record<string, string> = {
-  "vtc-mariage-reunion":                   "/Blog/categories/mariage.jpg",
-  "vtc-nuit-transport-securite-reunion":   "/Blog/categories/nuit.jpg",
-  "vtc-noel-reveillon-reunion":            "/Blog/categories/soiree.jpg",
-  "vtc-anniversaire-fete-reunion":         "/Blog/categories/soiree.jpg",
-  "vtc-concert-spectacle-reunion":         "/Blog/categories/soiree.jpg",
-  "vtc-cilaos-cirque-reunion":             "/Blog/categories/cirque-altitude.jpg",
-  "vtc-bambous-tampon-reunion":            "/Blog/categories/cirque-altitude.jpg",
-  "vtc-saint-joseph-sud-sauvage-reunion":  "/Blog/categories/cirque-altitude.jpg",
-  "vtc-saint-gilles-les-bains":            "/Blog/categories/plage-ouest.jpg",
-  "vtc-saint-leu-tamarin-flic-en-flac":   "/Blog/categories/plage-ouest.jpg",
-  "vtc-saint-pierre-saint-leu-ouest":      "/Blog/categories/plage-ouest.jpg",
-  "transport-famille-enfants-reunion":     "/Blog/categories/famille.jpg",
-  "vtc-touriste-reunion":                  "/Blog/categories/famille.jpg",
-  "vtc-expatrie-reunion":                  "/Blog/categories/famille.jpg",
-  "transfert-aeroport-roland-garros":      "/Blog/categories/aeroport.jpg",
-  "vtc-aeroport-vol-retard-reunion":       "/Blog/categories/aeroport.jpg",
-  "navette-hotel-aeroport-reunion":        "/Blog/categories/aeroport.jpg",
-  "arriver-reunion-premier-conseil-transport": "/Blog/categories/aeroport.jpg",
+  // Aéroport / arrivée
+  "transfert-aeroport-roland-garros":          `${CAT}/route-littoral-ile-de-la-reunion.jpg`,
+  "vtc-aeroport-vol-retard-reunion":           `${CAT}/route-littoral-ile-de-la-reunion.jpg`,
+  "navette-hotel-aeroport-reunion":            `${CAT}/route-littoral-ile-de-la-reunion.jpg`,
+  "arriver-reunion-premier-conseil-transport": `${CAT}/route-littoral-ile-de-la-reunion.jpg`,
+  // Nuit / soirée / événements
+  "vtc-nuit-transport-securite-reunion":       `${CAT}/coucher-soleil-ile-de-la-reunion.jpg`,
+  "vtc-soiree-evenement-reunion":              `${CAT}/restaurant-ile-de-la-reunion.jpg`,
+  "vtc-anniversaire-fete-reunion":             `${CAT}/restaurant-ile-de-la-reunion.jpg`,
+  "vtc-concert-spectacle-reunion":             `${CAT}/restaurant-ile-de-la-reunion.jpg`,
+  "vtc-noel-reveillon-reunion":                `${CAT}/coucher-soleil-ile-de-la-reunion.jpg`,
+  "vtc-mariage-reunion":                       `${CAT}/coucher-soleil-ile-de-la-reunion.jpg`,
+  // Hauts / altitude / volcan
+  "vtc-cilaos-cirque-reunion":                 `${CAT}/montagne-ile-de-la-reunion.jpg`,
+  "vtc-bambous-tampon-reunion":                `${CAT}/montagne-ile-de-la-reunion.jpg`,
+  "vtc-saint-joseph-sud-sauvage-reunion":      `${CAT}/volcan-ile-de-la-reunion.jpg`,
+  "vtc-securite-route-reunion":                `${CAT}/route-volcan-ile-de-la-reunion.jpg`,
+  // Côte / plage / lagon
+  "vtc-saint-gilles-les-bains":               `${CAT}/recif-corail-ile-de-la-reunion.jpg`,
+  "vtc-saint-leu-tamarin-flic-en-flac":        `${CAT}/recif-corail-ile-de-la-reunion.jpg`,
+  "vtc-saint-pierre-saint-leu-ouest":          `${CAT}/recif-corail-ile-de-la-reunion.jpg`,
+  // Tourisme / nature
+  "vtc-touriste-reunion":                      `${CAT}/cascade-touritique-ile-de-la-reunion.jpg`,
+  "vtc-expatrie-reunion":                      `${CAT}/cascade-sud-ile-de-la-reunion.jpg`,
+  "transport-famille-enfants-reunion":         `${CAT}/cascade-touritique-ile-de-la-reunion.jpg`,
+  "transport-sport-marathon-triathlon-reunion":`${CAT}/montagne-ile-de-la-reunion.jpg`,
 };
 
 function resolveHero(slug: string, category: string, mdxHero?: string): string {
