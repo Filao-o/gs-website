@@ -489,7 +489,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
           <div className="flex flex-col sm:flex-row gap-3 items-start">
             <button
               onClick={() => setStep("firstName")}
-              className="flex items-center gap-2 bg-[#091424] text-white text-sm font-medium pl-6 pr-4 py-3.5 rounded-full hover:bg-[#091424]/85 transition-all group shrink-0"
+              className="flex items-center gap-2 bg-[#091424] text-white text-sm font-medium pl-6 pr-4 h-12 rounded-full hover:bg-[#091424]/85 transition-all group shrink-0"
             >
               Commencer
               <span className="w-7 h-7 bg-white/15 rounded-full flex items-center justify-center group-hover:bg-white/25 transition-colors">
@@ -499,7 +499,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
             <button
               type="button"
               onClick={() => setStep("custom")}
-              className="flex items-center gap-2 border border-[#091424]/12 text-[#091424]/50 hover:text-[#091424] hover:border-[#091424]/25 text-sm font-medium px-6 py-3.5 rounded-full transition-all shrink-0"
+              className="flex items-center gap-2 border border-[#091424]/12 text-[#091424]/50 hover:text-[#091424] hover:border-[#091424]/25 text-sm font-medium px-6 h-12 rounded-full transition-all shrink-0"
             >
               Trajet personnalisé <ChevronRight size={14} />
             </button>
