@@ -255,7 +255,7 @@ export async function POST(req: NextRequest) {
       resend.emails.send({
         from: FROM_EMAIL,
         to: CHAUFFEUR_EMAIL,
-        reply_to: email || undefined,
+        replyTo: email || undefined,
         subject: `🚗 Nouvelle réservation — ${firstName} ${lastName} · ${departDatetime}`,
         html: emailChauffeur(emailData),
       }),
@@ -263,7 +263,7 @@ export async function POST(req: NextRequest) {
       ...(email ? [resend.emails.send({
         from: FROM_EMAIL,
         to: email,
-        reply_to: CHAUFFEUR_EMAIL,
+        replyTo: CHAUFFEUR_EMAIL,
         subject: `Votre demande de réservation GS Transport — ${departDatetime}`,
         html: emailClient(emailData),
       })] : []),
