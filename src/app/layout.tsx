@@ -16,6 +16,11 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "GS Transport" }],
   creator: "GS Transport",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+  },
   robots: { index: true, follow: true },
   alternates: { canonical: "https://gstransport.re" },
   openGraph: {
