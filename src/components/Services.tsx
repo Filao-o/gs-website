@@ -69,9 +69,14 @@ export default function Services() {
           </div>
         </div>
 
-        {/* Image placeholder */}
-        <div className="mt-12 lg:mt-16 rounded-2xl overflow-hidden aspect-[16/6] bg-[#091424]/6 flex items-center justify-center relative">
-          <p className="text-[#091424]/20 text-sm font-medium tracking-widest uppercase">Photo à venir</p>
+        {/* Image */}
+        <div className="mt-12 lg:mt-16 rounded-2xl overflow-hidden aspect-[16/6] relative">
+          <Image
+            src="/Services/Grande Ravine Bridge.jpg"
+            alt="Viaduc de la Grande Ravine — Route des Tamarins, La Réunion"
+            fill
+            className="object-cover"
+          />
         </div>
 
       </div>
