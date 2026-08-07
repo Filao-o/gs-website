@@ -455,33 +455,29 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
             <img src="/Hero/Card Hero/road.jpg" alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
             <div className="absolute inset-0 bg-[#091424]/70 backdrop-blur-[2px]" />
             <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-[#1FA3BA]/20 rounded-xl flex items-center justify-center">
-                  <Car size={20} className="text-[#1FA3BA]" />
-                </div>
-                <span className="text-white/60 text-sm font-medium">GS Transport · Réservation</span>
+              <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-6">
+                <Car size={13} className="text-[#1FA3BA]" />
+                <span className="text-white/80 text-xs font-medium">Prend moins de 2 minutes · Paiement à bord</span>
               </div>
               <h2 className="font-heading text-white text-3xl lg:text-4xl font-light leading-snug mb-3">
                 Planifiez votre trajet<br />en quelques instants.
               </h2>
               <p className="text-white/55 text-sm leading-relaxed max-w-sm">
-                Répondez à quelques questions et obtenez une estimation du tarif immédiatement.
+                Faites une demande de réservation et recevez une estimation du prix immédiatement — rien ne vous engage.
               </p>
             </div>
           </div>
         ) : (
           <div className="bg-[#091424] px-8 pt-10 pb-8 lg:px-12 lg:pt-14 lg:pb-10">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-[#1FA3BA]/20 rounded-xl flex items-center justify-center">
-                <Car size={20} className="text-[#1FA3BA]" />
-              </div>
-              <span className="text-white/50 text-sm font-medium">GS Transport · Réservation</span>
+            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-6">
+              <Car size={13} className="text-[#1FA3BA]" />
+              <span className="text-white/80 text-xs font-medium">Prend moins de 2 minutes · Paiement à bord</span>
             </div>
             <h2 className="font-heading text-white text-3xl lg:text-4xl font-light leading-snug mb-3">
               Planifiez votre trajet<br />en quelques instants.
             </h2>
             <p className="text-white/50 text-sm leading-relaxed max-w-sm">
-              Répondez à quelques questions et obtenez une estimation du tarif immédiatement.
+              Faites une demande de réservation et recevez une estimation du prix immédiatement — rien ne vous engage.
             </p>
           </div>
         )}
@@ -491,7 +487,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
               onClick={() => setStep("firstName")}
               className="flex items-center gap-2 bg-[#091424] text-white text-sm font-medium pl-6 pr-4 h-12 rounded-full hover:bg-[#091424]/85 transition-all group shrink-0"
             >
-              Commencer
+              Réserver
               <span className="w-7 h-7 bg-white/15 rounded-full flex items-center justify-center group-hover:bg-white/25 transition-colors">
                 <ArrowRight size={14} />
               </span>
@@ -501,11 +497,10 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
               onClick={() => setStep("custom")}
               className="flex items-center gap-2 border border-[#091424]/12 text-[#091424]/50 hover:text-[#091424] hover:border-[#091424]/25 text-sm font-medium px-6 h-12 rounded-full transition-all shrink-0"
             >
-              Trajet personnalisé <ChevronRight size={14} />
+              Faire une demande <ChevronRight size={14} />
             </button>
           </div>
-          <p className="text-xs text-[#091424]/30 mt-4">Contacter le chauffeur directement pour un besoin spécifique.</p>
-          <p className="text-xs text-[#091424]/25 mt-1">Prend moins de 2 minutes · Paiement à bord</p>
+          <p className="text-xs text-[#091424]/30 mt-4">Contacter le chauffeur directement pour un trajet spécifique.</p>
 
           {/* Présentation véhicule */}
           <div className="mt-6 pt-6 border-t border-[#091424]/6">
