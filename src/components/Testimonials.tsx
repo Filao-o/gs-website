@@ -54,15 +54,15 @@ const DOUBLED = [...reviews, ...reviews];
 
 function ReviewCard({ r }: { r: typeof reviews[0] }) {
   return (
-    <div className="shrink-0 w-[320px] lg:w-[380px] bg-white rounded-2xl p-7 shadow-md border border-[#091424]/8 flex flex-col gap-4">
-      <Quote size={24} className="text-[#091424]/15" />
-      <p className="text-[#091424]/70 leading-relaxed text-sm flex-1">{r.text}</p>
+    <div className="shrink-0 w-[240px] lg:w-[380px] bg-white rounded-2xl p-5 lg:p-7 shadow-md border border-[#091424]/8 flex flex-col gap-3 lg:gap-4">
+      <Quote size={18} className="text-[#091424]/15 lg:w-6 lg:h-6" />
+      <p className="text-[#091424]/70 leading-relaxed text-xs lg:text-sm flex-1 line-clamp-4 lg:line-clamp-none">{r.text}</p>
       <div className="flex items-center justify-between pt-2 border-t border-[#091424]/8">
         <div>
-          <p className="font-medium text-[#091424] text-sm">{r.name}</p>
-          <p className="text-[#091424]/40 text-xs">{r.date}</p>
+          <p className="font-medium text-[#091424] text-xs lg:text-sm">{r.name}</p>
+          <p className="text-[#091424]/40 text-[10px] lg:text-xs">{r.date}</p>
         </div>
-        <span className="text-xs text-[#1FA3BA] font-medium tracking-wide uppercase">Client vérifié</span>
+        <span className="text-[10px] lg:text-xs text-[#1FA3BA] font-medium tracking-wide uppercase">Vérifié</span>
       </div>
     </div>
   );
