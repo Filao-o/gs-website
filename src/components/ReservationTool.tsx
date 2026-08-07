@@ -450,10 +450,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
     <div ref={containerRef}>
       <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#091424]/5">
         {heroVariant === "image" ? (
-          <div className="relative px-8 pt-10 pb-8 lg:px-12 lg:pt-14 lg:pb-10 overflow-hidden min-h-[220px]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/Hero/Card Hero/road.jpg" alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
-            <div className="absolute inset-0 bg-[#091424]/20" />
+          <div className="relative px-8 pt-10 pb-8 lg:px-12 lg:pt-14 lg:pb-10 bg-[#091424] min-h-[220px]">
             <div className="relative z-10">
               <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-6">
                 <Car size={13} className="text-[#1FA3BA]" />
