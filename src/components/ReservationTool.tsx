@@ -454,7 +454,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
             <div className="relative z-10">
               <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-6">
                 <Car size={13} className="text-[#1FA3BA]" />
-                <span className="text-white/80 text-xs font-medium">Prend moins de 2 minutes · Paiement à bord</span>
+                <span className="text-white/80 text-xs font-medium">Moins de 2 minutes · Paiement à bord</span>
               </div>
               <h2 className="font-heading text-white text-3xl lg:text-4xl font-light leading-snug mb-3">
                 Planifiez votre trajet<br />en quelques instants.
@@ -468,7 +468,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
           <div className="bg-[#091424] px-8 pt-10 pb-8 lg:px-12 lg:pt-14 lg:pb-10">
             <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-6">
               <Car size={13} className="text-[#1FA3BA]" />
-              <span className="text-white/80 text-xs font-medium">Prend moins de 2 minutes · Paiement à bord</span>
+              <span className="text-white/80 text-xs font-medium">Moins de 2 minutes · Paiement à bord</span>
             </div>
             <h2 className="font-heading text-white text-3xl lg:text-4xl font-light leading-snug mb-3">
               Planifiez votre trajet<br />en quelques instants.
