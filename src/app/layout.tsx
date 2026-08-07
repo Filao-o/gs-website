@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   creator: "GS Transport",
   icons: {
     icon: [
-      { url: "/Favicon.svg", type: "image/svg+xml" },
+      { url: "/icon.svg", type: "image/svg+xml", sizes: "any" },
     ],
   },
   robots: { index: true, follow: true },
