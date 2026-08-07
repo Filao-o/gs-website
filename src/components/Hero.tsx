@@ -5,11 +5,11 @@ import { ArrowUpRight, MapPin } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 
 const SLIDES = [
-  { src: "/Hero/Card Hero/forest.jpg",   label: "Transfert Aéroport",     sub: "Roland Garros · 24h/24",    pos: "object-center" },
-  { src: "/Hero/Card Hero/beach.jpg",    label: "Navette Hôtel",          sub: "À domicile · Sur appel",    pos: "object-left" },
-  { src: "/Hero/Card Hero/volcano.jpg",  label: "Soirées & Événements",   sub: "Mariages, dîners, galas",   pos: "object-right-bottom" },
-  { src: "/Hero/Card Hero/road.jpg",     label: "Business",               sub: "Réunions · Séminaires",     pos: "object-top" },
-  { src: "/Hero/Card Hero/mounts.jpg",   label: "Mise à disposition",     sub: "À l'heure · Sur mesure",    pos: "object-bottom" },
+  { src: "/Hero/Card Hero/aeroport.jpg",    label: "Transfert Aéroport",     sub: "Roland Garros · 24h/24",    pos: "object-center" },
+  { src: "/Hero/Card Hero/hotel.jpg",       label: "Navette Hôtel",          sub: "À domicile · Sur appel",    pos: "object-left" },
+  { src: "/Hero/Card Hero/soiree.jpg",      label: "Soirées & Événements",   sub: "Mariages, dîners, galas",   pos: "object-right-bottom" },
+  { src: "/Hero/Card Hero/business.jpg",    label: "Business",               sub: "Réunions · Séminaires",     pos: "object-top" },
+  { src: "/Hero/Card Hero/disposition.jpg", label: "Mise à disposition",     sub: "À l'heure · Sur mesure",    pos: "object-bottom" },
 ];
 
 const N        = SLIDES.length;
