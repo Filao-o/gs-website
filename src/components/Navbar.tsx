@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ArrowUpRight, Menu, Phone, X } from "lucide-react";
+import Image from "next/image";
 
 const links = [
   { label: "Accueil", href: "/" },
@@ -30,15 +31,15 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
 
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2 z-10">
-          <span className="font-heading text-2xl lg:text-3xl font-bold text-[#1FA3BA] leading-none">GS</span>
-          <span
-            className={`font-heading text-sm lg:text-base font-light tracking-[0.2em] uppercase transition-colors duration-300 ${
-              scrolled ? "text-white" : "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]"
-            }`}
-          >
-            Transport
-          </span>
+        <a href="/" className="flex items-center z-10">
+          <Image
+            src="/logo blanc.svg"
+            alt="GS Transport"
+            width={160}
+            height={60}
+            className="h-10 lg:h-12 w-auto"
+            priority
+          />
         </a>
 
         {/* Pill nav — desktop */}
