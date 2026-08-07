@@ -37,7 +37,7 @@ export default function Navbar() {
             alt="GS Transport"
             width={160}
             height={60}
-            className="h-10 lg:h-12 w-auto"
+            className="h-20 lg:h-24 w-auto"
             priority
           />
         </a>
