@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowUpRight, Star, MapPin } from "lucide-react";
+import { ArrowUpRight, MapPin } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 
 const SLIDES = [
@@ -128,11 +128,7 @@ export default function Hero() {
               <span className="text-white text-xs sm:text-sm font-medium">+260 clients récurrents</span>
             </div>
             <div className="w-px h-5 bg-white/40" />
-            <div className="flex items-center gap-1.5">
-              <Star size={15} fill="#ffffff" className="text-white" />
-              <span className="text-white font-bold text-sm sm:text-base">5,0</span>
-              <span className="text-white text-xs sm:text-sm">/ 5</span>
-            </div>
+            <span className="text-white text-xs sm:text-sm">Disponible 24h/24</span>
           </div>
 
           {/* CTA */}
