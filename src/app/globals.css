@@ -49,12 +49,12 @@ h1, h2, h3, h4 {
 .ticker-track {
   display: flex;
   width: max-content;
-  animation: ticker 30s linear infinite;
+  animation: ticker 120s linear infinite;
 }
 
 @media (min-width: 768px) {
   .ticker-track {
-    animation-duration: 55s;
+    animation-duration: 200s;
   }
 }
 
