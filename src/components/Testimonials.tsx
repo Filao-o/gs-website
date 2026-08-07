@@ -1,6 +1,6 @@
 "use client";
 
-import { Star, Quote } from "lucide-react";
+import { Quote } from "lucide-react";
 
 const reviews = [
   {
@@ -62,11 +62,7 @@ function ReviewCard({ r }: { r: typeof reviews[0] }) {
           <p className="font-medium text-[#091424] text-sm">{r.name}</p>
           <p className="text-[#091424]/40 text-xs">{r.date}</p>
         </div>
-        <div className="flex gap-1">
-          {[...Array(5)].map((_, i) => (
-            <Star key={i} size={16} fill="#1FA3BA" className="text-[#1FA3BA]" />
-          ))}
-        </div>
+        <span className="text-xs text-[#1FA3BA] font-medium tracking-wide uppercase">Client vérifié</span>
       </div>
     </div>
   );
@@ -82,12 +78,7 @@ export default function Testimonials() {
           <h2 className="font-heading text-[#091424] text-4xl md:text-5xl font-light">
             Ils nous font confiance
           </h2>
-          <div className="flex items-center justify-center gap-2 mt-6">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} size={20} fill="#1FA3BA" className="text-[#1FA3BA]" />
-            ))}
-            <span className="ml-2 text-[#091424]/40 text-sm font-medium">5,0 / 5 — 50+ avis</span>
-          </div>
+          <p className="text-[#091424]/40 text-sm font-medium mt-4">+200 clients · 80% reviennent</p>
         </div>
 
       </div>

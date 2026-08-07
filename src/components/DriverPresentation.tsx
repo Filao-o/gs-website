@@ -41,9 +41,9 @@ export default function DriverPresentation() {
             </div>
             {/* Badge */}
             <div className="absolute bottom-4 right-4 lg:-bottom-6 lg:-right-6 bg-[#1FA3BA] rounded-2xl p-4 lg:p-6 shadow-xl">
-              <p className="font-heading text-3xl lg:text-4xl font-bold text-white">5★</p>
-              <p className="text-sm text-white mt-1">Note moyenne</p>
-              <p className="text-sm text-white">+50 avis vérifiés</p>
+              <p className="font-heading text-3xl lg:text-4xl font-bold text-white">+200</p>
+              <p className="text-sm text-white mt-1">clients satisfaits</p>
+              <p className="text-sm text-white/80">dont 80% récurrents</p>
             </div>
           </div>
 
