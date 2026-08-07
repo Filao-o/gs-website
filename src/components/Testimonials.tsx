@@ -4,49 +4,189 @@ import { Quote } from "lucide-react";
 
 const reviews = [
   {
-    name: "Marie-France D.",
-    date: "Mars 2024",
-    text: "Transfert depuis l'aéroport parfait. Sébastien était là avant même que je sorte des bagages, SUV impeccable, trajet fluide. Un service qu'on ne retrouve pas ailleurs à La Réunion.",
+    name: "Isabelle Provost",
+    date: "Septembre 2025",
+    text: "Sébastien est beaucoup plus qu'un chauffeur. Il ne prend pas en charge que la course, il prend en charge la sécurité de chacun, le bien-être de chaque passager.",
   },
   {
-    name: "Jean-Luc P.",
+    name: "Céline Martigny",
+    date: "Septembre 2025",
+    text: "Sébastien, très agréable et ouvert à la conversation. Il sait vous mettre à l'aise dès la 1ère minute ! Ce qui fait que le voyage se fait avec le sourire.",
+  },
+  {
+    name: "malika hoarau",
+    date: "Octobre 2024",
+    text: "Sébastien est quelqu'un de très agréable, gentil et discret, il est ouvert à la discussion — les trajets passent en un clin d'œil, on ne voit pas le temps passer.",
+  },
+  {
+    name: "Iain Stark",
+    date: "Avril 2025",
+    text: "J'ai fait un aller retour de l'aéroport à Saint-Pierre avec Sébastien. Je ne peux que le recommander pour son professionnalisme et sa grande gentillesse. Sonia",
+  },
+  {
+    name: "Karl COUVIGNOU",
+    date: "Mai 2024",
+    text: "Contact découvert par hasard mais je recommande fortement pour vos déplacements sur l'île de La Réunion. Sébastien est très professionnel et très serviable.",
+  },
+  {
+    name: "Ornella A.V",
+    date: "Mars 2025",
+    text: "Un service de grande qualité ! Sébastien est un chauffeur de confiance, offrant un excellent accueil et un service irréprochable.",
+  },
+  {
+    name: "malik ibrahim",
     date: "Février 2024",
-    text: "Vol retardé de 2h, Sébastien avait suivi en temps réel et était là sans que j'aie besoin de le rappeler. Ce niveau de service, c'est exactement ce qu'on attend d'un vrai chauffeur.",
+    text: "Sebastien a vraiment été génial pour le transfert de l'aéroport à mon domicile ! Son véhicule était super confortable et franchement on se sentait super bien.",
   },
   {
-    name: "Sophie & Marc",
-    date: "Janvier 2024",
-    text: "Il nous a conduits pour notre mariage avec une discrétion et une élégance irréprochables. Le véhicule était magnifique, à l'heure, et Sébastien d'une gentillesse rare.",
-  },
-  {
-    name: "Thomas R.",
+    name: "Tahina Najaraly",
     date: "Décembre 2023",
-    text: "Mon chauffeur attitré pour tous mes déplacements pro à La Réunion. Ponctuel, discret, véhicule premium — exactement ce dont j'ai besoin pour recevoir mes clients.",
+    text: "GS Transport a sauvé notre escapade en amoureux à la dernière minute ! Grand professionnel et très sympathique, on s'est tout de suite senti entre de bonnes mains.",
   },
   {
-    name: "Amandine L.",
-    date: "Novembre 2023",
-    text: "Retour de soirée à minuit, prise en charge impeccable. On sentait qu'on était entre de bonnes mains. Plus jamais de taxi classique après ça.",
+    name: "marie christine saen",
+    date: "Mars 2025",
+    text: "C'était une première expérience avec Sebastien, mais nous renouvellerons car c'est un chauffeur hors-pair, discret, super gentil conduisant avec beaucoup de douceur et de maîtrise.",
   },
   {
-    name: "Frédéric M.",
-    date: "Octobre 2023",
-    text: "Sébastien a récupéré mes collègues à l'aéroport pendant que j'étais en réunion. Tout s'est passé parfaitement, sans que j'aie à gérer quoi que ce soit. Un vrai professionnel.",
+    name: "GREG M",
+    date: "Décembre 2023",
+    text: "Tout simplement parfait. Sébastien est un excellent chauffeur, ponctuel et d'une très grande gentillesse. Merci à toi. Bonne continuation.",
   },
   {
-    name: "Nathalie V.",
+    name: "ella fatol",
+    date: "Mars 2023",
+    text: "Sébastien est ponctuel et sérieux. Nous l'avons contacté à l'occasion d'un anniversaire, aller/retour entre l'hôtel et le restaurant sans problème. Je recommande pour vos événements.",
+  },
+  {
+    name: "Jean Yves RENĖ",
+    date: "Octobre 2024",
+    text: "Bravo et merci encore à Sébastien pour la qualité de son service ! Chauffeur au petit soin de ses clients et à l'heure — ce qui est TRES IMPORTANT lorsqu'on exerce cette activité !",
+  },
+  {
+    name: "Ambre Lightwood",
+    date: "Décembre 2023",
+    text: "Merci à Sébastien pour sa ponctualité et sa gentillesse. J'ai fait un transfert L'Hermitage – aéroport Roland Garros à un tarif plus que correct.",
+  },
+  {
+    name: "Candace Nagle",
+    date: "Janvier 2023",
+    text: "Quelle belle journée avec Sébastien pour aller voir le Piton de la Fournaise ! Le trajet y était d'une beauté époustouflante. Une journée parfaite.",
+  },
+  {
+    name: "Herm Malala",
+    date: "Octobre 2024",
+    text: "Excellent service. Relationnel de qualité. M. Sébastien a été très pro et consciencieux. Merci.",
+  },
+  {
+    name: "Edith Nativel",
     date: "Septembre 2023",
-    text: "J'utilise GS Transport pour tous mes trajets depuis l'aéroport. La régularité du service est impressionnante — toujours à l'heure, véhicule impeccable, sourire au rendez-vous.",
+    text: "Nous avons fait appel à GS Transport pour un départ de la rivière Saint-Louis à Saint-Denis. Très satisfaites du service : ponctualité, professionnalisme, gentillesse.",
   },
   {
-    name: "Christophe & Julie",
-    date: "Août 2023",
-    text: "Nous avons privatisé Sébastien pour toute la journée de notre mariage. Une organisation sans faille, une élégance naturelle. Nos invités ont adoré. Merci infiniment.",
+    name: "Helene Diaz",
+    date: "Janvier 2024",
+    text: "Nous avons eu une très bonne expérience. Sébastien est ponctuel et très accueillant. Merci !",
   },
   {
-    name: "Patrick O.",
+    name: "Julien DELAVEGAS",
+    date: "Mai 2024",
+    text: "J'ai fait appel à ses services plusieurs fois : chauffeur ponctuel, bonne conduite et voiture très propre ! Je recommande sans hésitation.",
+  },
+  {
+    name: "Cloé Lafosse",
     date: "Juillet 2023",
-    text: "Déplacement pro de Saint-Denis à Saint-Pierre aller-retour. Sébastien connaît parfaitement l'île, la conduite est fluide et rassurante. Je recommande sans hésiter.",
+    text: "Un taximan qui a fait de notre trajet un moment agréable. La qualité du service nous a conquis — c'était notre première fois mais pas la dernière ! Merci Sébastien.",
+  },
+  {
+    name: "Hawell Guerengomba",
+    date: "Novembre 2023",
+    text: "Très belle expérience avec Sébastien, une belle personne, il a été d'une grande aide durant le séjour. Je recommande fortement sans hésitation !",
+  },
+  {
+    name: "Willy Suter",
+    date: "Novembre 2023",
+    text: "Nous avons passé une excellente journée à La Réunion. L'excursion au Cirque de Salazie était magnifique. Nous recommandons cette excursion vivement.",
+  },
+  {
+    name: "Chantal COLIN",
+    date: "Octobre 2023",
+    text: "Appel pris en compte rapidement et le délai annoncé a été respecté. Bonne ambiance dans la voiture et discussion intéressante.",
+  },
+  {
+    name: "Patricia Bodo-Schwartz",
+    date: "Avril 2025",
+    text: "Sebastien offre un service très professionnel, très sympathique, que je ne peux que recommander.",
+  },
+  {
+    name: "alexandre souchon",
+    date: "Juillet 2024",
+    text: "Notre chauffeur était à l'heure, agréable et discret. Tous nos remerciements.",
+  },
+  {
+    name: "Joshua De Freitas",
+    date: "Octobre 2023",
+    text: "Service au top ! Ponctuel, conduite agréable et conducteur sympathique qui plus est. Rien à changer !",
+  },
+  {
+    name: "Anissa nour",
+    date: "Mai 2025",
+    text: "Super expérience. Disponible, à l'écoute. Je recommande fortement.",
+  },
+  {
+    name: "sophie couval",
+    date: "Janvier 2024",
+    text: "Sébastien est bienveillant et ponctuel. Je vous le recommande vivement.",
+  },
+  {
+    name: "Florence Escuret",
+    date: "Septembre 2023",
+    text: "Ponctuel, fiable, gentil. Très bonne conduite. Je recommande à 100%.",
+  },
+  {
+    name: "Denis Fabre",
+    date: "Novembre 2023",
+    text: "Super chauffeur, très ponctuel et sympathique. Je recommande grandement !",
+  },
+  {
+    name: "Josiane Levasseur",
+    date: "Janvier 2024",
+    text: "Chauffeur très sympa et patient dans les embouteillages. Je le recommande.",
+  },
+  {
+    name: "Damien Montalbano",
+    date: "Décembre 2024",
+    text: "Compagnie très sérieuse. Je recommande vivement.",
+  },
+  {
+    name: "Iris CASERUS",
+    date: "Octobre 2024",
+    text: "Très bon trajet. Chauffeur très sympathique. Merci.",
+  },
+  {
+    name: "Emmanuelle L.",
+    date: "Janvier 2023",
+    text: "Sébastien est très ponctuel et sympathique.",
+  },
+  {
+    name: "jean-marc pascal",
+    date: "Septembre 2023",
+    text: "Sébastien est très à l'écoute et très disponible. Nous sommes ravis de sa prestation.",
+  },
+  {
+    name: "Mathilde Frémont",
+    date: "Septembre 2023",
+    text: "Super chauffeur, ponctuel avec une conduite douce ! Merci Seb !",
+  },
+  {
+    name: "Big Gamers",
+    date: "Mars 2026",
+    text: "Bonne expérience, je recommande.",
+  },
+  {
+    name: "Marie Annick MRADAMY",
+    date: "Octobre 2023",
+    text: "Très agréable, très bon accueil. On va faire appel à votre service de transport. Je vous conseille GS Transport, c'est sérieux.",
   },
 ];
 
