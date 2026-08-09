@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -112,19 +113,18 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`h-full antialiased ${cormorant.variable} ${inter.variable}`}>
       <head>
-        {/* Google Ads tag */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-11120101808" />
-        <script dangerouslySetInnerHTML={{ __html: `
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'AW-11120101808');
-        `}} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
+      <Script src="https://www.googletagmanager.com/gtag/js?id=AW-11120101808" strategy="afterInteractive" />
+      <Script id="gtag-init" strategy="afterInteractive">{`
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'AW-11120101808');
+      `}</Script>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
