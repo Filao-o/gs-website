@@ -1,6 +1,42 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      // Anciennes URLs politique de confidentialité
+      {
+        source: "/politique-de-confidentialite",
+        destination: "/confidentialite",
+        permanent: true,
+      },
+      {
+        source: "/politique-de-confidentialite/",
+        destination: "/confidentialite",
+        permanent: true,
+      },
+      {
+        source: "/politique-de-confidentialite-2",
+        destination: "/confidentialite",
+        permanent: true,
+      },
+      {
+        source: "/politique-de-confidentialite-2/",
+        destination: "/confidentialite",
+        permanent: true,
+      },
+      // Page introuvable linkée par Google
+      {
+        source: "/excursion-louest-de-la-reunion",
+        destination: "/blog",
+        permanent: true,
+      },
+      {
+        source: "/excursion-louest-de-la-reunion/",
+        destination: "/blog",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     // Autorise les très grandes images (ex: 4480×6720)
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
