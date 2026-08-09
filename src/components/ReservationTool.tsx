@@ -917,7 +917,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
                   if (typeof window !== "undefined" && (window as any).gtag) {
                     (window as any).gtag('event', 'conversion', {
                       send_to: 'AW-11120101808/wYNCCMPL-N4cELCTvbYp',
-                      value: prix?.total ?? 1,
+                      value: prix?.prixFinal ?? 1,
                       currency: 'EUR',
                       event_callback: () => {},
                     });
