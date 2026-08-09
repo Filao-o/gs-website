@@ -575,7 +575,17 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
           <textarea value={form.customDescription} onChange={e => set("customDescription", e.target.value)} placeholder="Décrivez votre trajet, vos dates, vos besoins…" rows={4}
             className="w-full bg-[#091424]/4 border border-[#091424]/10 rounded-xl px-4 py-3 text-sm text-[#091424] placeholder-[#091424]/30 focus:outline-none focus:border-[#1FA3BA] focus:ring-2 focus:ring-[#1FA3BA]/15 transition-all resize-none" />
         </div>
-        <ContinueBtn label="Envoyer ma demande" onClick={() => { setConfirmed(true); if (typeof window !== "undefined" && (window as any).gtag) { (window as any).gtag('event', 'conversion', { send_to: 'AW-11120101808/wYNCCMPL-N4cELCTvbYp', currency: 'EUR' }); } }} disabled={!form.customName || !form.customPhone || !form.customDescription} />
+        <ContinueBtn label="Envoyer ma demande" onClick={() => {
+          setConfirmed(true);
+          if (typeof window !== "undefined" && (window as any).gtag) {
+            (window as any).gtag('event', 'conversion', {
+              send_to: 'AW-11120101808/wYNCCMPL-N4cELCTvbYp',
+              value: 1,
+              currency: 'EUR',
+              event_callback: () => {},
+            });
+          }
+        }} disabled={!form.customName || !form.customPhone || !form.customDescription} />
       </div>
     </div>
   );
@@ -909,6 +919,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
                       send_to: 'AW-11120101808/wYNCCMPL-N4cELCTvbYp',
                       value: prix?.total ?? 1,
                       currency: 'EUR',
+                      event_callback: () => {},
                     });
                   }
                 }}
