@@ -7,8 +7,8 @@
   --color-beige: #E8E6DB;
   --color-background: #F5F4F0;
   --color-foreground: #091424;
-  --font-heading: 'Cormorant Garamond', serif;
-  --font-body: 'Inter', sans-serif;
+  --font-heading: var(--font-cormorant), serif;
+  --font-body: var(--font-inter), sans-serif;
 }
 
 * {
