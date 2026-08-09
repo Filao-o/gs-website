@@ -47,7 +47,7 @@ const jsonLd = {
   name: "GS Transport",
   description: "Service de chauffeur privé VTC sur l'île de La Réunion. Transferts aéroport, événements, déplacements professionnels. Disponible 24h/24.",
   url: "https://gstransport.re",
-  telephone: "+262692000000",
+  telephone: "+262693512282",
   priceRange: "€€",
   image: "https://gstransport.re/og-image.jpg",
   address: {
