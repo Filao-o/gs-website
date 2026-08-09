@@ -1,15 +1,10 @@
 import { MetadataRoute } from "next";
-import fs from "fs";
-import path from "path";
+import { getAllPosts } from "@/lib/blog";
 
 const BASE_URL = "https://gstransport.re";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const blogDir = path.join(process.cwd(), "src/content/blog");
-  const slugs = fs
-    .readdirSync(blogDir)
-    .filter((f) => f.endsWith(".mdx"))
-    .map((f) => f.replace(/\.mdx$/, ""));
+  const slugs = getAllPosts().map((p) => p.slug);
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: BASE_URL, lastModified: new Date(), changeFrequency: "weekly", priority: 1.0 },
