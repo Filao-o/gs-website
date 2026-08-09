@@ -112,6 +112,14 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`h-full antialiased ${cormorant.variable} ${inter.variable}`}>
       <head>
+        {/* Google Ads tag */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-11120101808" />
+        <script dangerouslySetInnerHTML={{ __html: `
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'AW-11120101808');
+        `}} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
