@@ -40,6 +40,54 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": "https://gstransport.re",
+  name: "GS Transport",
+  description: "Service de chauffeur privé VTC sur l'île de La Réunion. Transferts aéroport, événements, déplacements professionnels. Disponible 24h/24.",
+  url: "https://gstransport.re",
+  telephone: "+262692000000",
+  priceRange: "€€",
+  image: "https://gstransport.re/og-image.jpg",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Sainte-Marie",
+    addressRegion: "La Réunion",
+    postalCode: "97438",
+    addressCountry: "RE",
+  },
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: -20.9022,
+    longitude: 55.5348,
+  },
+  areaServed: {
+    "@type": "GeoCircle",
+    geoMidpoint: {
+      "@type": "GeoCoordinates",
+      latitude: -21.1,
+      longitude: 55.5,
+    },
+    geoRadius: "80000",
+  },
+  openingHoursSpecification: {
+    "@type": "OpeningHoursSpecification",
+    dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+    opens: "00:00",
+    closes: "23:59",
+  },
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "5",
+    reviewCount: "52",
+    bestRating: "5",
+  },
+  sameAs: [
+    "https://www.google.com/maps/place/GS+TRANSPORT+-+Chauffeur+Priv%C3%A9",
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -47,6 +95,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className="h-full antialiased">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
