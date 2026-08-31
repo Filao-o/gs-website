@@ -205,7 +205,6 @@ export async function POST(req: NextRequest) {
       distanceKm, dureeMin,
     } = body;
 
-    // ── Google Calendar ──
     const [departDate, departTime] = departDatetime.split(" à ");
     const [hour, minute] = departTime.split(":");
     const startTime = new Date(`${departDate}T${hour.padStart(2,"0")}:${minute.padStart(2,"0")}:00+04:00`);
@@ -215,31 +214,6 @@ export async function POST(req: NextRequest) {
     const vehicleLabel = vehicle === "suv" ? "SUV Premium 4 places" : "Van Premium 8 places";
     const tripLabel    = tripType === "AR" ? "Aller-retour" : "Aller simple";
     const distanceInfo = distanceKm != null ? `\n📏 Distance : ${distanceKm} km · ${dureeMin} min` : "";
-
-    let description = `👤 Client : ${firstName} ${lastName}\n📞 Téléphone : ${phone}\n📧 Email : ${email}\n\n🚗 Type : ${tripLabel}\n🚙 Véhicule : ${vehicleLabel}\n\n📍 Départ : ${pickup}\n🏁 Destination : ${destination}${distanceInfo}\n\n💶 Estimation : ${prix} €`;
-    if (tripType === "AR" && retourDatetime) description += `\n\n🔄 Retour : ${retourDatetime}`;
-
-    await calendar.events.insert({
-      calendarId: "primary",
-      sendUpdates: "all",
-      requestBody: {
-        summary: `🚗 Course GS Transport — ${firstName} ${lastName}`,
-        description,
-        start: { dateTime: startTime.toISOString(), timeZone: "Indian/Reunion" },
-        end:   { dateTime: endTime.toISOString(),   timeZone: "Indian/Reunion" },
-        colorId: "7",
-        attendees: [{ email: CHAUFFEUR_EMAIL }],
-        reminders: {
-          useDefault: false,
-          overrides: [
-            { method: "popup", minutes: 60 },
-            { method: "popup", minutes: 15 },
-          ],
-        },
-      },
-    });
-
-    // ── Emails ──
     const [retourDate, retourTime] = retourDatetime ? retourDatetime.split(" à ") : [undefined, undefined];
 
     const emailData = {
@@ -250,28 +224,67 @@ export async function POST(req: NextRequest) {
       prix, distanceKm, dureeMin,
     };
 
-    await Promise.all([
-      // Email chauffeur
-      resend.emails.send({
-        from: FROM_EMAIL,
-        to: CHAUFFEUR_EMAIL,
-        replyTo: email || undefined,
-        subject: `🚗 Nouvelle réservation — ${firstName} ${lastName} · ${departDatetime}`,
-        html: emailChauffeur(emailData),
-      }),
-      // Email client (seulement si email fourni)
-      ...(email ? [resend.emails.send({
-        from: FROM_EMAIL,
-        to: email,
-        replyTo: CHAUFFEUR_EMAIL,
-        subject: `Votre demande de réservation GS Transport — ${departDatetime}`,
-        html: emailClient(emailData),
-      })] : []),
-    ]);
+    // ── Google Calendar (indépendant des emails) ──
+    let calendarOk = false;
+    try {
+      let description = `👤 Client : ${firstName} ${lastName}\n📞 Téléphone : ${phone}\n📧 Email : ${email}\n\n🚗 Type : ${tripLabel}\n🚙 Véhicule : ${vehicleLabel}\n\n📍 Départ : ${pickup}\n🏁 Destination : ${destination}${distanceInfo}\n\n💶 Estimation : ${prix} €`;
+      if (tripType === "AR" && retourDatetime) description += `\n\n🔄 Retour : ${retourDatetime}`;
 
-    return NextResponse.json({ success: true });
+      await calendar.events.insert({
+        calendarId: "primary",
+        sendUpdates: "all",
+        requestBody: {
+          summary: `🚗 Course GS Transport — ${firstName} ${lastName}`,
+          description,
+          start: { dateTime: startTime.toISOString(), timeZone: "Indian/Reunion" },
+          end:   { dateTime: endTime.toISOString(),   timeZone: "Indian/Reunion" },
+          colorId: "7",
+          attendees: [{ email: CHAUFFEUR_EMAIL }],
+          reminders: {
+            useDefault: false,
+            overrides: [
+              { method: "popup", minutes: 60 },
+              { method: "popup", minutes: 15 },
+            ],
+          },
+        },
+      });
+      calendarOk = true;
+    } catch (calendarError) {
+      console.error("Google Calendar error:", calendarError);
+    }
+
+    // ── Emails (toujours envoyés, même si le calendrier échoue) ──
+    let emailsOk = false;
+    try {
+      await Promise.all([
+        resend.emails.send({
+          from: FROM_EMAIL,
+          to: CHAUFFEUR_EMAIL,
+          replyTo: email || undefined,
+          subject: `🚗 Nouvelle réservation — ${firstName} ${lastName} · ${departDatetime}`,
+          html: emailChauffeur(emailData),
+        }),
+        ...(email ? [resend.emails.send({
+          from: FROM_EMAIL,
+          to: email,
+          replyTo: CHAUFFEUR_EMAIL,
+          subject: `Votre demande de réservation GS Transport — ${departDatetime}`,
+          html: emailClient(emailData),
+        })] : []),
+      ]);
+      emailsOk = true;
+    } catch (emailError) {
+      console.error("Email error:", emailError);
+    }
+
+    if (!calendarOk && !emailsOk) {
+      return NextResponse.json({ success: false, error: "Calendar and email both failed" }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, calendarOk, emailsOk });
   } catch (error) {
-    console.error("Calendar/email error:", error);
+    console.error("Reservation API error:", error);
     return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
   }
 }
