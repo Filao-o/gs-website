@@ -122,20 +122,35 @@ export default function AddressAutocomplete({
   const selectPrediction = (pred: Prediction) => {
     if (!placesRef.current) return;
     placesRef.current.getDetails(
-      { placeId: pred.place_id, fields: ["formatted_address"] },
+      { placeId: pred.place_id, fields: ["formatted_address", "types"] },
       (place, status) => {
-        if (status === window.google.maps.places.PlacesServiceStatus.OK && place?.formatted_address) {
-          if (inputRef.current) inputRef.current.value = place.formatted_address;
-          onChange(place.formatted_address);
-          markValid(true);
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && place) {
+          const types = place.types ?? [];
+          const tooVague = types.some(t =>
+            ["locality", "administrative_area_level_1", "administrative_area_level_2", "sublocality", "sublocality_level_1"].includes(t)
+          ) && !types.some(t =>
+            ["street_address", "route", "establishment", "point_of_interest", "premise", "subpremise", "airport", "lodging", "transit_station", "bus_station", "train_station"].includes(t)
+          );
+
+          const addr = place.formatted_address ?? pred.description;
+          if (inputRef.current) inputRef.current.value = addr;
+          onChange(addr);
+
+          if (tooVague) {
+            markValid(false);
+            setError("Merci de préciser une adresse (rue, hôtel, lieu-dit…) pour une estimation fiable");
+          } else {
+            markValid(true);
+            setError(null);
+          }
         } else {
           if (inputRef.current) inputRef.current.value = pred.description;
           onChange(pred.description);
           markValid(true);
+          setError(null);
         }
         setPredictions([]);
         setOpen(false);
-        setError(null);
       }
     );
   };
