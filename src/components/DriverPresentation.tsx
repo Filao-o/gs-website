@@ -13,7 +13,7 @@ const details = [
   },
   {
     title: "Disponible 24h/24",
-    desc: "Vol à 5h du matin, soirée à minuit.",
+    desc: "Vol à 5h du matin, rendez-vous à 22h.",
     sub: "Réservez en ligne à toute heure — Sébastien confirme et s'adapte à votre planning.",
   },
   {
@@ -60,7 +60,7 @@ export default function DriverPresentation() {
             </p>
             <p className="text-[#091424]/60 leading-relaxed mb-6 text-sm sm:text-base">
               De Sainte-Marie à Saint-Leu, il couvre toute la zone nord-ouest de l'île,
-              24h/24, dans une SUV neuve. Aéroport, hôtel, soirée ou rendez-vous pro —
+              24h/24, dans une SUV neuve. Aéroport, hôtel ou rendez-vous pro —
               il s'adapte à votre agenda, pas l'inverse.
             </p>
 

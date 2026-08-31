@@ -13,11 +13,6 @@ const services = [
   },
   {
     num: "03",
-    title: "Soirées & Événements",
-    desc: "Mariage, dîner gastronomique, soirée privée, gala. Rentrez sereinement, Sébastien vous attend.",
-  },
-  {
-    num: "04",
     title: "Déplacements Pro",
     desc: "Réunions, séminaires, rendez-vous clients. Ponctualité garantie, véhicule premium, discrétion totale.",
   },
@@ -39,7 +34,7 @@ export default function Services() {
                 Un chauffeur privé pour chaque besoin
               </h2>
               <p className="text-[#091424]/50 text-sm leading-relaxed">
-                Que ce soit à 6h du matin pour un vol ou à minuit après une soirée,
+                Que ce soit à 6h du matin pour un vol ou pour un rendez-vous,
                 Sébastien est là. Simple, fiable, premium.
               </p>
             </div>
@@ -52,7 +47,7 @@ export default function Services() {
           <div className="hidden lg:block w-px bg-[#091424]/10 mx-0 self-stretch" />
 
           {/* Colonnes étapes — droite */}
-          <div className="lg:flex-1 grid grid-cols-2 lg:grid-cols-4 divide-x divide-[#091424]/10">
+          <div className="lg:flex-1 grid grid-cols-2 lg:grid-cols-3 divide-x divide-[#091424]/10">
             {services.map((s) => (
               <div key={s.num} className="px-6 lg:px-8 py-2 lg:py-0 first:pl-0 lg:first:pl-8">
                 {/* Numéro + ligne verticale */}

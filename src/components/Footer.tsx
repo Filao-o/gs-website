@@ -27,7 +27,7 @@ export default function Footer() {
             </div>
             <p className="text-white/50 text-sm leading-relaxed max-w-xs mb-6">
               Votre chauffeur privé de confiance sur l'île de La Réunion.
-              VTC premium disponible 24h/24 de Sainte-Marie à Saint-Leu. Aéroport, hôtels, soirées, déplacements pro.
+              VTC premium disponible 24h/24 de Sainte-Marie à Saint-Leu. Aéroport, hôtels, déplacements pro.
             </p>
             <a
               href="#reservation"
