@@ -22,10 +22,10 @@ interface Props {
 interface Prediction {
   place_id: string;
   description: string;
-  structured_formatting: {
+  structured_formatting?: {
     main_text: string;
-    main_text_matched_substrings: Array<{ offset: number; length: number }>;
-    secondary_text: string;
+    main_text_matched_substrings?: Array<{ offset: number; length: number }>;
+    secondary_text?: string;
   };
 }
 
@@ -44,7 +44,8 @@ function highlightMain(
   return parts;
 }
 
-function parseSecondary(secondary: string): { commune: string; rest: string } {
+function parseSecondary(secondary: string | undefined): { commune: string; rest: string } {
+  if (!secondary) return { commune: "", rest: "" };
   const parts = secondary.split(",").map(s => s.trim()).filter(Boolean);
   // Drop trailing "Réunion" / "France" as it's implicit
   const filtered = parts.filter(p => p !== "Réunion" && p !== "France");
@@ -255,7 +256,10 @@ export default function AddressAutocomplete({
         {open && predictions.length > 0 && (
           <div className="absolute z-50 top-full mt-1.5 left-0 right-0 bg-white border border-[#091424]/10 rounded-2xl shadow-xl overflow-hidden">
             {predictions.map((pred, idx) => {
-              const { commune, rest } = parseSecondary(pred.structured_formatting.secondary_text);
+              const sf = pred.structured_formatting;
+              const { commune, rest } = parseSecondary(sf?.secondary_text);
+              const mainText = sf?.main_text ?? pred.description;
+              const mainMatches = sf?.main_text_matched_substrings ?? [];
               return (
                 <button
                   key={pred.place_id}
@@ -265,16 +269,13 @@ export default function AddressAutocomplete({
                 >
                   <MapPin size={14} className="text-[#1FA3BA] shrink-0 mt-0.5" />
                   <div className="min-w-0">
-                    {/* Commune — big and visible */}
-                    <p className="text-sm font-semibold text-[#091424] leading-snug">{commune}</p>
-                    {/* Street — highlighted match */}
-                    <p className="text-xs mt-0.5 leading-snug">
-                      {highlightMain(
-                        pred.structured_formatting.main_text,
-                        pred.structured_formatting.main_text_matched_substrings ?? []
-                      )}
-                      {rest ? <span className="text-[#091424]/30"> · {rest}</span> : null}
-                    </p>
+                    <p className="text-sm font-semibold text-[#091424] leading-snug">{commune || mainText}</p>
+                    {commune && (
+                      <p className="text-xs mt-0.5 leading-snug">
+                        {highlightMain(mainText, mainMatches)}
+                        {rest ? <span className="text-[#091424]/30"> · {rest}</span> : null}
+                      </p>
+                    )}
                   </div>
                 </button>
               );
