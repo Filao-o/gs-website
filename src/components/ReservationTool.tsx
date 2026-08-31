@@ -955,7 +955,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
               const prev = thread[thread.length - 1];
               if (!prev) { setStep("intro"); return; }
               setThread(t => t.slice(0,-1));
-              const steps: StepId[] = ["firstName","lastName","phone","tripType","pickup","datetime","destination","returnDestination","retourDatetime","price"];
+              const steps = form.tripType === "AR" ? STEPS_AR : STEPS_AS;
               const idx = steps.indexOf(step as StepId);
               setStep(idx > 0 ? steps[idx-1] : "intro");
             }} className="flex items-center gap-2 text-sm font-medium text-[#091424]/70 hover:text-[#091424] transition-colors mb-8 border border-[#091424]/10 hover:border-[#091424]/25 rounded-full px-4 py-2 w-fit">
