@@ -14,9 +14,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Clé API manquante" }, { status: 500 });
   }
 
+  const origineLat      = searchParams.get("origineLat");
+  const origineLng      = searchParams.get("origineLng");
+  const destinationLat  = searchParams.get("destinationLat");
+  const destinationLng  = searchParams.get("destinationLng");
+
+  const origineValue     = origineLat && origineLng ? `${origineLat},${origineLng}` : `${origine}, La Réunion`;
+  const destinationValue = destinationLat && destinationLng ? `${destinationLat},${destinationLng}` : `${destination}, La Réunion`;
+
   const url = new URL("https://maps.googleapis.com/maps/api/distancematrix/json");
-  url.searchParams.set("origins", `${origine}, La Réunion`);
-  url.searchParams.set("destinations", `${destination}, La Réunion`);
+  url.searchParams.set("origins", origineValue);
+  url.searchParams.set("destinations", destinationValue);
   url.searchParams.set("mode", "driving");
   url.searchParams.set("language", "fr");
   url.searchParams.set("region", "re");

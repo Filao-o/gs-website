@@ -4,11 +4,17 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { MapPin, Locate, Loader2 } from "lucide-react";
 import { loadGoogleMaps } from "@/lib/loadGoogleMaps";
 
+interface Coords {
+  lat: number;
+  lng: number;
+}
+
 interface Props {
   label: string;
   value: string;
   onChange: (value: string) => void;
   onValidated?: (valid: boolean) => void;
+  onCoords?: (coords: Coords | null) => void;
   placeholder?: string;
   showGeolocate?: boolean;
 }
@@ -48,7 +54,7 @@ function parseSecondary(secondary: string): { commune: string; rest: string } {
 }
 
 export default function AddressAutocomplete({
-  label, value, onChange, onValidated, placeholder, showGeolocate = false,
+  label, value, onChange, onValidated, onCoords, placeholder, showGeolocate = false,
 }: Props) {
   const inputRef        = useRef<HTMLInputElement>(null);
   const serviceRef      = useRef<google.maps.places.AutocompleteService | null>(null);
@@ -113,6 +119,7 @@ export default function AddressAutocomplete({
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     if (validated) markValid(false);
+    onCoords?.(null);
     setError(null);
     onChange(val);
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -122,7 +129,7 @@ export default function AddressAutocomplete({
   const selectPrediction = (pred: Prediction) => {
     if (!placesRef.current) return;
     placesRef.current.getDetails(
-      { placeId: pred.place_id, fields: ["formatted_address", "types"] },
+      { placeId: pred.place_id, fields: ["formatted_address", "types", "geometry"] },
       (place, status) => {
         if (status === window.google.maps.places.PlacesServiceStatus.OK && place) {
           const types = place.types ?? [];
@@ -136,6 +143,11 @@ export default function AddressAutocomplete({
           if (inputRef.current) inputRef.current.value = addr;
           onChange(addr);
 
+          const loc = place.geometry?.location;
+          if (loc) {
+            onCoords?.({ lat: loc.lat(), lng: loc.lng() });
+          }
+
           if (tooVague) {
             markValid(false);
             setError("Merci de préciser une adresse (rue, hôtel, lieu-dit…) pour une estimation fiable");
@@ -146,6 +158,7 @@ export default function AddressAutocomplete({
         } else {
           if (inputRef.current) inputRef.current.value = pred.description;
           onChange(pred.description);
+          onCoords?.(null);
           markValid(true);
           setError(null);
         }
@@ -179,6 +192,7 @@ export default function AddressAutocomplete({
           if (adresse && inputRef.current) {
             inputRef.current.value = adresse;
             onChange(adresse);
+            onCoords?.({ lat: latitude, lng: longitude });
             markValid(true);
             setOpen(false);
           }

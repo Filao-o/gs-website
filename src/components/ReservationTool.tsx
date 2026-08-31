@@ -382,14 +382,21 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
   const [returnPickupValid,      setReturnPickupValid]      = useState(false);
   const [showReturnPickup,       setShowReturnPickup]       = useState(false);
 
-  const containerRef      = useRef<HTMLDivElement>(null);
-  const departDatetimeRef = useRef(departDatetime);
-  const retourDatetimeRef = useRef(retourDatetime);
-  const formRef           = useRef(form);
+  const [pickupCoords,      setPickupCoords]      = useState<{ lat: number; lng: number } | null>(null);
+  const [destinationCoords, setDestinationCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+  const containerRef        = useRef<HTMLDivElement>(null);
+  const departDatetimeRef   = useRef(departDatetime);
+  const retourDatetimeRef   = useRef(retourDatetime);
+  const formRef             = useRef(form);
+  const pickupCoordsRef     = useRef(pickupCoords);
+  const destinationCoordsRef = useRef(destinationCoords);
 
   useEffect(() => { departDatetimeRef.current = departDatetime; }, [departDatetime]);
   useEffect(() => { retourDatetimeRef.current = retourDatetime; }, [retourDatetime]);
   useEffect(() => { formRef.current = form; }, [form]);
+  useEffect(() => { pickupCoordsRef.current = pickupCoords; }, [pickupCoords]);
+  useEffect(() => { destinationCoordsRef.current = destinationCoords; }, [destinationCoords]);
 
   const set = (key: keyof FormData, val: unknown) => setForm(f => ({ ...f, [key]: val }));
 
@@ -421,15 +428,18 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
   }, []);
 
   const calculerDistance = async () => {
-    // Lire depuis les refs pour éviter les closures périmées
     const dt    = departDatetimeRef.current;
     const f     = formRef.current;
     const heure = parseInt(dt.time.split(":")[0], 10);
     const jour  = new Date(`${dt.date}T${dt.time}`).getDay();
+    const pCoords = pickupCoordsRef.current;
+    const dCoords = destinationCoordsRef.current;
 
     setLoading(true); setErreur(null); setPrix(null);
     try {
       const params = new URLSearchParams({ origine: f.pickup, destination: f.destination });
+      if (pCoords) { params.set("origineLat", String(pCoords.lat)); params.set("origineLng", String(pCoords.lng)); }
+      if (dCoords) { params.set("destinationLat", String(dCoords.lat)); params.set("destinationLng", String(dCoords.lng)); }
       const res  = await fetch(`/api/distance?${params}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erreur calcul");
@@ -706,7 +716,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
     if (step === "pickup") return (
       <>
         <Question text="Vous partez d'où ?" />
-        <AddressAutocomplete key="pickup" label="" value={form.pickup} onChange={v => set("pickup", v)} onValidated={setPickupValid}
+        <AddressAutocomplete key="pickup" label="" value={form.pickup} onChange={v => set("pickup", v)} onValidated={setPickupValid} onCoords={setPickupCoords}
           placeholder="Ex : Aéroport Roland Garros, Sainte-Marie" showGeolocate />
         <ContinueBtn disabled={!pickupValid} onClick={() => push("Vous partez d'où ?", form.pickup, form.tripType === "AR" ? "datetime" : "destination")} />
       </>
@@ -716,7 +726,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
     if (step === "destination") return (
       <>
         <Question text="Et votre destination ?" />
-        <AddressAutocomplete key="destination" label="" value={form.destination} onChange={v => set("destination", v)} onValidated={setDestinationValid}
+        <AddressAutocomplete key="destination" label="" value={form.destination} onChange={v => set("destination", v)} onValidated={setDestinationValid} onCoords={setDestinationCoords}
           placeholder="Ex : Hôtel Iloha, Saint-Leu" />
         <ContinueBtn disabled={!destinationValid} onClick={() => {
           push("Et votre destination ?", form.destination, form.tripType === "AR" ? "returnDestination" : "datetime");
