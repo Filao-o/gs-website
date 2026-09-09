@@ -26,7 +26,7 @@ export default function Gallery() {
           overflow: hidden;
           aspect-ratio: 3/4;
         }
-        .gallery-mosaic > *:first-child,
+        .gallery-mosaic > *:nth-child(1),
         .gallery-mosaic > *:nth-child(8) {
           grid-column: span 2;
           aspect-ratio: 4/3;
@@ -34,20 +34,22 @@ export default function Gallery() {
         @media (min-width: 1024px) {
           .gallery-mosaic {
             grid-template-columns: repeat(12, 1fr);
-            grid-auto-rows: 260px;
+            grid-auto-rows: 240px;
           }
-          .gallery-mosaic > * {
+          .gallery-mosaic > *,
+          .gallery-mosaic > *:nth-child(1),
+          .gallery-mosaic > *:nth-child(8) {
             aspect-ratio: auto;
             grid-column: auto;
           }
-          .gallery-mosaic > *:nth-child(1) { grid-area: 1 / 1 / 3 / 6; }
-          .gallery-mosaic > *:nth-child(2) { grid-area: 1 / 6 / 2 / 10; }
-          .gallery-mosaic > *:nth-child(3) { grid-area: 1 / 10 / 2 / 13; }
-          .gallery-mosaic > *:nth-child(4) { grid-area: 2 / 6 / 3 / 8; }
-          .gallery-mosaic > *:nth-child(5) { grid-area: 2 / 8 / 4 / 13; }
-          .gallery-mosaic > *:nth-child(6) { grid-area: 3 / 1 / 4 / 4; }
-          .gallery-mosaic > *:nth-child(7) { grid-area: 3 / 4 / 4 / 6; }
-          .gallery-mosaic > *:nth-child(8) { grid-area: 3 / 6 / 4 / 8; }
+          .gallery-mosaic > *:nth-child(1) { grid-area: 1/1/3/6; }
+          .gallery-mosaic > *:nth-child(2) { grid-area: 1/6/2/13; }
+          .gallery-mosaic > *:nth-child(3) { grid-area: 2/6/3/13; }
+          .gallery-mosaic > *:nth-child(4) { grid-area: 3/1/4/5; }
+          .gallery-mosaic > *:nth-child(5) { grid-area: 3/5/4/9; }
+          .gallery-mosaic > *:nth-child(6) { grid-area: 3/9/4/13; }
+          .gallery-mosaic > *:nth-child(7) { grid-area: 4/1/5/6; }
+          .gallery-mosaic > *:nth-child(8) { grid-area: 4/6/5/13; }
         }
       `}</style>
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
