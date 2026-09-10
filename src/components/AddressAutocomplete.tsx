@@ -4,11 +4,17 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { MapPin, Locate, Loader2 } from "lucide-react";
 import { loadGoogleMaps } from "@/lib/loadGoogleMaps";
 
+interface Coords {
+  lat: number;
+  lng: number;
+}
+
 interface Props {
   label: string;
   value: string;
   onChange: (value: string) => void;
   onValidated?: (valid: boolean) => void;
+  onCoords?: (coords: Coords | null) => void;
   placeholder?: string;
   showGeolocate?: boolean;
 }
@@ -16,10 +22,10 @@ interface Props {
 interface Prediction {
   place_id: string;
   description: string;
-  structured_formatting: {
+  structured_formatting?: {
     main_text: string;
-    main_text_matched_substrings: Array<{ offset: number; length: number }>;
-    secondary_text: string;
+    main_text_matched_substrings?: Array<{ offset: number; length: number }>;
+    secondary_text?: string;
   };
 }
 
@@ -38,7 +44,8 @@ function highlightMain(
   return parts;
 }
 
-function parseSecondary(secondary: string): { commune: string; rest: string } {
+function parseSecondary(secondary: string | undefined): { commune: string; rest: string } {
+  if (!secondary) return { commune: "", rest: "" };
   const parts = secondary.split(",").map(s => s.trim()).filter(Boolean);
   // Drop trailing "Réunion" / "France" as it's implicit
   const filtered = parts.filter(p => p !== "Réunion" && p !== "France");
@@ -48,7 +55,7 @@ function parseSecondary(secondary: string): { commune: string; rest: string } {
 }
 
 export default function AddressAutocomplete({
-  label, value, onChange, onValidated, placeholder, showGeolocate = false,
+  label, value, onChange, onValidated, onCoords, placeholder, showGeolocate = false,
 }: Props) {
   const inputRef        = useRef<HTMLInputElement>(null);
   const serviceRef      = useRef<google.maps.places.AutocompleteService | null>(null);
@@ -113,6 +120,7 @@ export default function AddressAutocomplete({
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     if (validated) markValid(false);
+    onCoords?.(null);
     setError(null);
     onChange(val);
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -122,20 +130,41 @@ export default function AddressAutocomplete({
   const selectPrediction = (pred: Prediction) => {
     if (!placesRef.current) return;
     placesRef.current.getDetails(
-      { placeId: pred.place_id, fields: ["formatted_address"] },
+      { placeId: pred.place_id, fields: ["formatted_address", "types", "geometry"] },
       (place, status) => {
-        if (status === window.google.maps.places.PlacesServiceStatus.OK && place?.formatted_address) {
-          if (inputRef.current) inputRef.current.value = place.formatted_address;
-          onChange(place.formatted_address);
-          markValid(true);
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && place) {
+          const types = place.types ?? [];
+          const tooVague = types.some(t =>
+            ["locality", "administrative_area_level_1", "administrative_area_level_2", "sublocality", "sublocality_level_1"].includes(t)
+          ) && !types.some(t =>
+            ["street_address", "route", "establishment", "point_of_interest", "premise", "subpremise", "airport", "lodging", "transit_station", "bus_station", "train_station"].includes(t)
+          );
+
+          const addr = place.formatted_address ?? pred.description;
+          if (inputRef.current) inputRef.current.value = addr;
+          onChange(addr);
+
+          const loc = place.geometry?.location;
+          if (loc) {
+            onCoords?.({ lat: loc.lat(), lng: loc.lng() });
+          }
+
+          if (tooVague) {
+            markValid(false);
+            setError("Merci de préciser une adresse (rue, hôtel, lieu-dit…) pour une estimation fiable");
+          } else {
+            markValid(true);
+            setError(null);
+          }
         } else {
           if (inputRef.current) inputRef.current.value = pred.description;
           onChange(pred.description);
+          onCoords?.(null);
           markValid(true);
+          setError(null);
         }
         setPredictions([]);
         setOpen(false);
-        setError(null);
       }
     );
   };
@@ -164,6 +193,7 @@ export default function AddressAutocomplete({
           if (adresse && inputRef.current) {
             inputRef.current.value = adresse;
             onChange(adresse);
+            onCoords?.({ lat: latitude, lng: longitude });
             markValid(true);
             setOpen(false);
           }
@@ -226,7 +256,10 @@ export default function AddressAutocomplete({
         {open && predictions.length > 0 && (
           <div className="absolute z-50 top-full mt-1.5 left-0 right-0 bg-white border border-[#091424]/10 rounded-2xl shadow-xl overflow-hidden">
             {predictions.map((pred, idx) => {
-              const { commune, rest } = parseSecondary(pred.structured_formatting.secondary_text);
+              const sf = pred.structured_formatting;
+              const { commune, rest } = parseSecondary(sf?.secondary_text);
+              const mainText = sf?.main_text ?? pred.description;
+              const mainMatches = sf?.main_text_matched_substrings ?? [];
               return (
                 <button
                   key={pred.place_id}
@@ -236,16 +269,13 @@ export default function AddressAutocomplete({
                 >
                   <MapPin size={14} className="text-[#1FA3BA] shrink-0 mt-0.5" />
                   <div className="min-w-0">
-                    {/* Commune — big and visible */}
-                    <p className="text-sm font-semibold text-[#091424] leading-snug">{commune}</p>
-                    {/* Street — highlighted match */}
-                    <p className="text-xs mt-0.5 leading-snug">
-                      {highlightMain(
-                        pred.structured_formatting.main_text,
-                        pred.structured_formatting.main_text_matched_substrings ?? []
-                      )}
-                      {rest ? <span className="text-[#091424]/30"> · {rest}</span> : null}
-                    </p>
+                    <p className="text-sm font-semibold text-[#091424] leading-snug">{commune || mainText}</p>
+                    {commune && (
+                      <p className="text-xs mt-0.5 leading-snug">
+                        {highlightMain(mainText, mainMatches)}
+                        {rest ? <span className="text-[#091424]/30"> · {rest}</span> : null}
+                      </p>
+                    )}
                   </div>
                 </button>
               );

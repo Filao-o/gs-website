@@ -24,10 +24,10 @@ export const metadata: Metadata = {
     template: "%s — GS Transport",
   },
   description:
-    "Service de chauffeur privé VTC sur l'île de La Réunion. Transferts aéroport, événements, déplacements professionnels de Saint-Marie à Saint-Leu. Disponible 24h/24.",
+    "Service de chauffeur privé VTC sur l'île de La Réunion. Transferts aéroport, navettes hôtel, déplacements professionnels de Saint-Marie à Saint-Leu. Disponible 24h/24.",
   keywords: [
     "VTC Réunion", "chauffeur privé Réunion", "transfert aéroport Réunion",
-    "chauffeur événement Réunion", "GS Transport", "taxi Réunion",
+    "navette hôtel Réunion", "GS Transport", "taxi Réunion",
     "VTC 974", "chauffeur Sébastien Réunion",
   ],
   authors: [{ name: "GS Transport" }],
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://gstransport.re" },
   openGraph: {
     title: "GS Transport — Chauffeur Privé à La Réunion",
-    description: "Votre chauffeur privé de confiance à La Réunion. Transferts aéroport, événements, déplacements pro. Disponible 24h/24.",
+    description: "Votre chauffeur privé de confiance à La Réunion. Transferts aéroport, navettes hôtel, déplacements pro. Disponible 24h/24.",
     url: "https://gstransport.re",
     siteName: "GS Transport",
     locale: "fr_FR",
@@ -61,7 +61,7 @@ const jsonLd = {
   "@type": "LocalBusiness",
   "@id": "https://gstransport.re",
   name: "GS Transport",
-  description: "Service de chauffeur privé VTC sur l'île de La Réunion. Transferts aéroport, événements, déplacements professionnels. Disponible 24h/24.",
+  description: "Service de chauffeur privé VTC sur l'île de La Réunion. Transferts aéroport, navettes hôtel, déplacements professionnels. Disponible 24h/24.",
   url: "https://gstransport.re",
   telephone: "+262693512282",
   priceRange: "€€",

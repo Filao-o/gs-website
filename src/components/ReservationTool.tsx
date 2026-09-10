@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   ArrowRight, ArrowLeft, Car, Phone, MapPin,
-  Calendar, CheckCircle, Clock, ChevronRight, Loader2, Users, Wind, Droplets
+  Calendar, CheckCircle, Clock, ChevronRight, Loader2, Users, Wind, Droplets, Briefcase
 } from "lucide-react";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { calculerPrix, type PrixResult } from "@/lib/pricing";
@@ -22,6 +22,8 @@ interface FormData {
   email:              string;
   tripType:           TripType;
   vehicle:            Vehicle;
+  passengers:         number;
+  luggage:            number;
   pickup:             string;
   destination:        string;
   returnPickup:       string;
@@ -33,7 +35,7 @@ interface FormData {
 
 const INITIAL: FormData = {
   firstName: "", lastName: "", phoneCountry: "+262", phone: "", email: "",
-  tripType: null, vehicle: "suv",
+  tripType: null, vehicle: "suv", passengers: 1, luggage: 0,
   pickup: "", destination: "", returnPickup: "", returnDestination: "",
   customDescription: "", customName: "", customPhone: "",
 };
@@ -296,7 +298,7 @@ function DateTimePicker({ value, onChange }: { value: { date: string; time: stri
 type StepId =
   | "intro"
   | "firstName" | "lastName" | "phone" | "email"
-  | "tripType" | "vehicle"
+  | "tripType" | "details" | "vehicle"
   | "pickup" | "destination"
   | "returnDestination" | "returnPickup"
   | "datetime" | "retourDatetime"
@@ -307,8 +309,8 @@ type StepId =
 interface ThreadEntry { question: string; answer: string; }
 
 /* ─── Progress steps ─── */
-const STEPS_AS: StepId[] = ["firstName","lastName","phone","tripType","pickup","destination","datetime","price"];
-const STEPS_AR: StepId[] = ["firstName","lastName","phone","tripType","pickup","datetime","destination","returnDestination","retourDatetime","price"];
+const STEPS_AS: StepId[] = ["firstName","lastName","phone","tripType","details","pickup","destination","datetime","price"];
+const STEPS_AR: StepId[] = ["firstName","lastName","phone","tripType","details","pickup","datetime","destination","returnDestination","retourDatetime","price"];
 
 /* ─── Continue button ─── */
 function ContinueBtn({ onClick, disabled = false, label = "Continuer" }: { onClick: () => void; disabled?: boolean; label?: string }) {
@@ -360,6 +362,8 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
           destination: form.destination,
           tripType: form.tripType,
           vehicle: form.vehicle,
+          passengers: form.passengers,
+          luggage: form.luggage,
           departDatetime: `${departDatetime.date} à ${departDatetime.time}`,
           retourDatetime: form.tripType === "AR" ? `${retourDatetime.date} à ${retourDatetime.time}` : null,
           prix: prix?.prixFinal ?? null,
@@ -382,14 +386,21 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
   const [returnPickupValid,      setReturnPickupValid]      = useState(false);
   const [showReturnPickup,       setShowReturnPickup]       = useState(false);
 
-  const containerRef      = useRef<HTMLDivElement>(null);
-  const departDatetimeRef = useRef(departDatetime);
-  const retourDatetimeRef = useRef(retourDatetime);
-  const formRef           = useRef(form);
+  const [pickupCoords,      setPickupCoords]      = useState<{ lat: number; lng: number } | null>(null);
+  const [destinationCoords, setDestinationCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+  const containerRef        = useRef<HTMLDivElement>(null);
+  const departDatetimeRef   = useRef(departDatetime);
+  const retourDatetimeRef   = useRef(retourDatetime);
+  const formRef             = useRef(form);
+  const pickupCoordsRef     = useRef(pickupCoords);
+  const destinationCoordsRef = useRef(destinationCoords);
 
   useEffect(() => { departDatetimeRef.current = departDatetime; }, [departDatetime]);
   useEffect(() => { retourDatetimeRef.current = retourDatetime; }, [retourDatetime]);
   useEffect(() => { formRef.current = form; }, [form]);
+  useEffect(() => { pickupCoordsRef.current = pickupCoords; }, [pickupCoords]);
+  useEffect(() => { destinationCoordsRef.current = destinationCoords; }, [destinationCoords]);
 
   const set = (key: keyof FormData, val: unknown) => setForm(f => ({ ...f, [key]: val }));
 
@@ -421,15 +432,18 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
   }, []);
 
   const calculerDistance = async () => {
-    // Lire depuis les refs pour éviter les closures périmées
     const dt    = departDatetimeRef.current;
     const f     = formRef.current;
     const heure = parseInt(dt.time.split(":")[0], 10);
     const jour  = new Date(`${dt.date}T${dt.time}`).getDay();
+    const pCoords = pickupCoordsRef.current;
+    const dCoords = destinationCoordsRef.current;
 
     setLoading(true); setErreur(null); setPrix(null);
     try {
       const params = new URLSearchParams({ origine: f.pickup, destination: f.destination });
+      if (pCoords) { params.set("origineLat", String(pCoords.lat)); params.set("origineLng", String(pCoords.lng)); }
+      if (dCoords) { params.set("destinationLat", String(dCoords.lat)); params.set("destinationLng", String(dCoords.lng)); }
       const res  = await fetch(`/api/distance?${params}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erreur calcul");
@@ -537,6 +551,8 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
             ["Client", `${form.firstName} ${form.lastName}`],
             ["Départ", `${formatDateFr(departDatetime.date)} à ${departDatetime.time}`],
             ...(form.tripType === "AR" ? [["Retour", `${formatDateFr(retourDatetime.date)} à ${retourDatetime.time}`]] : []),
+            ["Passagers", `${form.passengers}`],
+            ["Bagages", `${form.luggage}`],
             ["Véhicule", "SUV Premium — 4 places"],
             ["Trajet", form.tripType === "AR" ? "Aller-retour" : "Aller simple"],
             ...(prix ? [["Estimation", `${prix.prixFinal} €`]] : []),
@@ -669,7 +685,57 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
             </button>
           ))}
         </div>
-        <ContinueBtn disabled={!form.tripType} onClick={() => push("Quel type de trajet souhaitez-vous ?", form.tripType === "AS" ? "Aller simple" : "Aller-retour", "pickup")} />
+        <ContinueBtn disabled={!form.tripType} onClick={() => push("Quel type de trajet souhaitez-vous ?", form.tripType === "AS" ? "Aller simple" : "Aller-retour", "details")} />
+      </>
+    );
+
+    // ── Passagers & bagages ──
+    if (step === "details") return (
+      <>
+        <Question text="Combien de passagers et de bagages ?" />
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between rounded-2xl p-5 border border-[#091424]/8 bg-[#091424]/4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#1FA3BA]/10 flex items-center justify-center">
+                <Users size={18} className="text-[#1FA3BA]" />
+              </div>
+              <div>
+                <p className="font-semibold text-[#091424] text-sm">Passagers</p>
+                <p className="text-[#091424]/40 text-xs">4 max · SUV Premium</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={() => set("passengers", Math.max(1, form.passengers - 1))}
+                disabled={form.passengers <= 1}
+                className="w-8 h-8 rounded-full border border-[#091424]/15 flex items-center justify-center text-[#091424]/50 hover:border-[#1FA3BA] hover:text-[#1FA3BA] transition-all disabled:opacity-30 disabled:cursor-not-allowed">−</button>
+              <span className="text-lg font-semibold text-[#091424] w-6 text-center">{form.passengers}</span>
+              <button type="button" onClick={() => set("passengers", Math.min(4, form.passengers + 1))}
+                disabled={form.passengers >= 4}
+                className="w-8 h-8 rounded-full border border-[#091424]/15 flex items-center justify-center text-[#091424]/50 hover:border-[#1FA3BA] hover:text-[#1FA3BA] transition-all disabled:opacity-30 disabled:cursor-not-allowed">+</button>
+            </div>
+          </div>
+          <div className="flex items-center justify-between rounded-2xl p-5 border border-[#091424]/8 bg-[#091424]/4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#1FA3BA]/10 flex items-center justify-center">
+                <Briefcase size={18} className="text-[#1FA3BA]" />
+              </div>
+              <div>
+                <p className="font-semibold text-[#091424] text-sm">Bagages</p>
+                <p className="text-[#091424]/40 text-xs">Valises, sacs volumineux</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={() => set("luggage", Math.max(0, form.luggage - 1))}
+                disabled={form.luggage <= 0}
+                className="w-8 h-8 rounded-full border border-[#091424]/15 flex items-center justify-center text-[#091424]/50 hover:border-[#1FA3BA] hover:text-[#1FA3BA] transition-all disabled:opacity-30 disabled:cursor-not-allowed">−</button>
+              <span className="text-lg font-semibold text-[#091424] w-6 text-center">{form.luggage}</span>
+              <button type="button" onClick={() => set("luggage", Math.min(4, form.luggage + 1))}
+                disabled={form.luggage >= 4}
+                className="w-8 h-8 rounded-full border border-[#091424]/15 flex items-center justify-center text-[#091424]/50 hover:border-[#1FA3BA] hover:text-[#1FA3BA] transition-all disabled:opacity-30 disabled:cursor-not-allowed">+</button>
+            </div>
+          </div>
+        </div>
+        <ContinueBtn onClick={() => push("Combien de passagers et de bagages ?", `${form.passengers} passager${form.passengers > 1 ? "s" : ""} · ${form.luggage} bagage${form.luggage > 1 ? "s" : ""}`, "pickup")} />
       </>
     );
 
@@ -706,7 +772,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
     if (step === "pickup") return (
       <>
         <Question text="Vous partez d'où ?" />
-        <AddressAutocomplete key="pickup" label="" value={form.pickup} onChange={v => set("pickup", v)} onValidated={setPickupValid}
+        <AddressAutocomplete key="pickup" label="" value={form.pickup} onChange={v => set("pickup", v)} onValidated={setPickupValid} onCoords={setPickupCoords}
           placeholder="Ex : Aéroport Roland Garros, Sainte-Marie" showGeolocate />
         <ContinueBtn disabled={!pickupValid} onClick={() => push("Vous partez d'où ?", form.pickup, form.tripType === "AR" ? "datetime" : "destination")} />
       </>
@@ -716,7 +782,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
     if (step === "destination") return (
       <>
         <Question text="Et votre destination ?" />
-        <AddressAutocomplete key="destination" label="" value={form.destination} onChange={v => set("destination", v)} onValidated={setDestinationValid}
+        <AddressAutocomplete key="destination" label="" value={form.destination} onChange={v => set("destination", v)} onValidated={setDestinationValid} onCoords={setDestinationCoords}
           placeholder="Ex : Hôtel Iloha, Saint-Leu" />
         <ContinueBtn disabled={!destinationValid} onClick={() => {
           push("Et votre destination ?", form.destination, form.tripType === "AR" ? "returnDestination" : "datetime");
@@ -800,6 +866,14 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
           <div className="flex justify-between text-sm gap-4">
             <span className="text-[#091424]/40 shrink-0">Type</span>
             <span className="text-[#091424]/80 font-medium text-right">{form.tripType === "AR" ? "Aller-retour" : "Aller simple"}</span>
+          </div>
+          <div className="flex justify-between text-sm gap-4">
+            <span className="text-[#091424]/40 shrink-0">Passagers</span>
+            <span className="text-[#091424]/80 font-medium text-right">{form.passengers}</span>
+          </div>
+          <div className="flex justify-between text-sm gap-4">
+            <span className="text-[#091424]/40 shrink-0">Bagages</span>
+            <span className="text-[#091424]/80 font-medium text-right">{form.luggage}</span>
           </div>
           <div className="flex justify-between text-sm gap-4">
             <span className="text-[#091424]/40 shrink-0">Départ</span>
@@ -955,7 +1029,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
               const prev = thread[thread.length - 1];
               if (!prev) { setStep("intro"); return; }
               setThread(t => t.slice(0,-1));
-              const steps: StepId[] = ["firstName","lastName","phone","tripType","pickup","datetime","destination","returnDestination","retourDatetime","price"];
+              const steps = form.tripType === "AR" ? STEPS_AR : STEPS_AS;
               const idx = steps.indexOf(step as StepId);
               setStep(idx > 0 ? steps[idx-1] : "intro");
             }} className="flex items-center gap-2 text-sm font-medium text-[#091424]/70 hover:text-[#091424] transition-colors mb-8 border border-[#091424]/10 hover:border-[#091424]/25 rounded-full px-4 py-2 w-fit">

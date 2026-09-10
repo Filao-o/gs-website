@@ -13,7 +13,7 @@ const details = [
   },
   {
     title: "Disponible 24h/24",
-    desc: "Vol à 5h du matin, soirée à minuit.",
+    desc: "Vol à 5h du matin, rendez-vous à 22h.",
     sub: "Réservez en ligne à toute heure — Sébastien confirme et s'adapte à votre planning.",
   },
   {
@@ -33,7 +33,7 @@ export default function DriverPresentation() {
           <div className="relative pb-0 lg:pb-0">
             <div className="aspect-[4/5] rounded-2xl overflow-hidden relative max-w-md mx-auto lg:max-w-none">
               <Image
-                src="/About Us/Chauffeur.png"
+                src="/gallery/2.jpg"
                 alt="Sébastien — Chauffeur privé GS Transport"
                 fill
                 className="object-cover"
@@ -60,7 +60,7 @@ export default function DriverPresentation() {
             </p>
             <p className="text-[#091424]/60 leading-relaxed mb-6 text-sm sm:text-base">
               De Sainte-Marie à Saint-Leu, il couvre toute la zone nord-ouest de l'île,
-              24h/24, dans une SUV neuve. Aéroport, hôtel, soirée ou rendez-vous pro —
+              24h/24, dans une SUV neuve. Aéroport, hôtel ou rendez-vous pro —
               il s'adapte à votre agenda, pas l'inverse.
             </p>
 

@@ -7,7 +7,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 const SLIDES = [
   { src: "/Hero/Card Hero/aeroport.jpg",    label: "Transfert Aéroport",     sub: "Roland Garros · 24h/24",    pos: "object-center" },
   { src: "/Hero/Card Hero/hotel.jpg",       label: "Navette Hôtel",          sub: "À domicile · Sur appel",    pos: "object-left" },
-  { src: "/Hero/Card Hero/soiree.jpg",      label: "Soirées & Événements",   sub: "Mariages, dîners, galas",   pos: "object-right-bottom" },
   { src: "/Hero/Card Hero/business.jpg",    label: "Business",               sub: "Réunions · Séminaires",     pos: "object-top" },
   { src: "/Hero/Card Hero/disposition.jpg", label: "Mise à disposition",     sub: "À l'heure · Sur mesure",    pos: "object-bottom" },
 ];
@@ -111,7 +110,7 @@ export default function Hero() {
 
           {/* Sous-titre */}
           <p className="text-white text-sm sm:text-base leading-relaxed max-w-sm mb-6 lg:mb-8">
-            Aéroport, hôtels, soirées, déplacements pro —
+            Aéroport, hôtels, déplacements pro —
             disponible 24h/24 de Sainte-Marie à Saint-Leu.
           </p>
 
