@@ -67,7 +67,7 @@ export default function Services() {
         {/* Image */}
         <div className="mt-12 lg:mt-16 rounded-2xl overflow-hidden aspect-[16/6] relative">
           <Image
-            src="/Services/services.jpg"
+            src="/gallery/11.jpg"
             alt="Chauffeur privé GS Transport à La Réunion"
             fill
             className="object-cover"
