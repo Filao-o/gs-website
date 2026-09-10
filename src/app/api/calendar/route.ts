@@ -27,6 +27,7 @@ function formatDateFrEmail(dateStr: string, time: string): string {
 function emailClient(data: {
   firstName: string; lastName: string; phone: string; email: string;
   pickup: string; destination: string; tripType: string;
+  passengers: number; luggage: number;
   departDate: string; departTime: string;
   retourDate?: string; retourTime?: string;
   prix: number; distanceKm?: number | null; dureeMin?: number | null;
@@ -69,6 +70,10 @@ function emailClient(data: {
             <tr><td style="padding:16px 20px;border-bottom:1px solid rgba(9,20,36,0.06);">
               <p style="margin:0 0 2px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:rgba(9,20,36,0.4);">Type de trajet</p>
               <p style="margin:0;font-size:14px;font-weight:500;color:#091424;">${tripLabel} · SUV Premium</p>
+            </td></tr>
+            <tr><td style="padding:16px 20px;border-bottom:1px solid rgba(9,20,36,0.06);">
+              <p style="margin:0 0 2px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:rgba(9,20,36,0.4);">Passagers / Bagages</p>
+              <p style="margin:0;font-size:14px;color:#091424;">${data.passengers} passager${data.passengers > 1 ? "s" : ""} · ${data.luggage} bagage${data.luggage > 1 ? "s" : ""}</p>
             </td></tr>
             <tr><td style="padding:16px 20px;border-bottom:1px solid rgba(9,20,36,0.06);">
               <p style="margin:0 0 2px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:rgba(9,20,36,0.4);">Départ</p>
@@ -117,6 +122,7 @@ function emailClient(data: {
 function emailChauffeur(data: {
   firstName: string; lastName: string; phone: string; email: string;
   pickup: string; destination: string; tripType: string;
+  passengers: number; luggage: number;
   departDate: string; departTime: string;
   retourDate?: string; retourTime?: string;
   prix: number; distanceKm?: number | null; dureeMin?: number | null;
@@ -157,6 +163,10 @@ function emailChauffeur(data: {
             <tr style="border-top:1px solid rgba(9,20,36,0.06);">
               <td style="padding:14px 18px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(9,20,36,0.4);">Type</td>
               <td style="padding:14px 18px;font-size:14px;color:#091424;">${tripLabel}</td>
+            </tr>
+            <tr style="border-top:1px solid rgba(9,20,36,0.06);">
+              <td style="padding:14px 18px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(9,20,36,0.4);">Passagers</td>
+              <td style="padding:14px 18px;font-size:14px;color:#091424;">${data.passengers} passager${data.passengers > 1 ? "s" : ""} · ${data.luggage} bagage${data.luggage > 1 ? "s" : ""}</td>
             </tr>
             <tr style="border-top:1px solid rgba(9,20,36,0.06);">
               <td style="padding:14px 18px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(9,20,36,0.4);">Départ</td>
@@ -201,6 +211,7 @@ export async function POST(req: NextRequest) {
     const {
       firstName, lastName, phone, email,
       pickup, destination, tripType, vehicle,
+      passengers = 1, luggage = 0,
       departDatetime, retourDatetime, prix,
       distanceKm, dureeMin,
     } = body;
@@ -219,6 +230,7 @@ export async function POST(req: NextRequest) {
     const emailData = {
       firstName, lastName, phone, email,
       pickup, destination, tripType,
+      passengers, luggage,
       departDate, departTime,
       retourDate, retourTime,
       prix, distanceKm, dureeMin,
@@ -227,7 +239,7 @@ export async function POST(req: NextRequest) {
     // ── Google Calendar (indépendant des emails) ──
     let calendarOk = false;
     try {
-      let description = `👤 Client : ${firstName} ${lastName}\n📞 Téléphone : ${phone}\n📧 Email : ${email}\n\n🚗 Type : ${tripLabel}\n🚙 Véhicule : ${vehicleLabel}\n\n📍 Départ : ${pickup}\n🏁 Destination : ${destination}${distanceInfo}\n\n💶 Estimation : ${prix} €`;
+      let description = `👤 Client : ${firstName} ${lastName}\n📞 Téléphone : ${phone}\n📧 Email : ${email}\n\n🚗 Type : ${tripLabel}\n🚙 Véhicule : ${vehicleLabel}\n👥 Passagers : ${passengers} · Bagages : ${luggage}\n\n📍 Départ : ${pickup}\n🏁 Destination : ${destination}${distanceInfo}\n\n💶 Estimation : ${prix} €`;
       if (tripType === "AR" && retourDatetime) description += `\n\n🔄 Retour : ${retourDatetime}`;
 
       await calendar.events.insert({
