@@ -33,7 +33,7 @@ export default function DriverPresentation() {
           <div className="relative pb-0 lg:pb-0">
             <div className="aspect-[4/5] rounded-2xl overflow-hidden relative max-w-md mx-auto lg:max-w-none">
               <Image
-                src="/About Us/Chauffeur.png"
+                src="/gallery/2.jpg"
                 alt="Sébastien — Chauffeur privé GS Transport"
                 fill
                 className="object-cover"
