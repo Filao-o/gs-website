@@ -79,7 +79,7 @@ export default function Hero() {
 
       {/* Background */}
       <div className="absolute inset-0">
-        <Image src="/Hero/hero-bg.webp" alt="Route côtière de La Réunion" fill priority className="object-cover object-center" />
+        <Image src="/gallery/2.jpg" alt="Sébastien — Chauffeur privé GS Transport" fill priority className="object-cover object-center" />
         {/* Overlay global léger */}
         <div className="absolute inset-0 bg-[#091424]/25" />
         {/* Dégradé sombre côté gauche pour lisibilité du texte */}
