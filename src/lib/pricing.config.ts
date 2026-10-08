@@ -17,7 +17,7 @@
 //  1. TARIF MINIMUM
 //  Prix plancher quelle que soit la distance.
 // ─────────────────────────────────────────────
-export const TARIF_MINIMUM = 25; // €
+export const TARIF_MINIMUM = 30; // €
 
 
 // ─────────────────────────────────────────────
