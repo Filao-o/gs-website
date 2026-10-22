@@ -350,7 +350,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
 
   const createCalendarEvent = async () => {
     try {
-      await fetch("/api/calendar", {
+      const res = await fetch("/api/calendar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -371,8 +371,27 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
           dureeMin: prix?.dureeMin ?? null,
         }),
       });
+      if (!res.ok) console.error("Calendar event failed:", res.status);
     } catch (e) {
       console.error("Calendar event error:", e);
+    }
+  };
+
+  const createCustomRequest = async () => {
+    try {
+      const res = await fetch("/api/calendar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          custom: true,
+          customName: form.customName,
+          customPhone: form.customPhone,
+          customDescription: form.customDescription,
+        }),
+      });
+      if (!res.ok) console.error("Custom request failed:", res.status);
+    } catch (e) {
+      console.error("Custom request error:", e);
     }
   };
 
@@ -593,6 +612,7 @@ export default function ReservationTool({ heroVariant = "dark" }: { heroVariant?
         </div>
         <ContinueBtn label="Envoyer ma demande" onClick={() => {
           setConfirmed(true);
+          createCustomRequest();
           if (typeof window !== "undefined" && (window as any).gtag) {
             (window as any).gtag('event', 'conversion', {
               send_to: 'AW-11120101808/wYNCCMPL-N4cELCTvbYp',

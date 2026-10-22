@@ -208,6 +208,87 @@ function emailChauffeur(data: {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+
+    // ── Custom request (free-form "Faire une demande") ──
+    if (body.custom) {
+      const { customName, customPhone, customDescription } = body;
+      const now = new Date();
+      const startTime = new Date(now.getTime() + 60 * 60 * 1000);
+      const endTime = new Date(startTime.getTime() + 30 * 60 * 1000);
+
+      let calendarOk = false;
+      try {
+        await calendar.events.insert({
+          calendarId: "primary",
+          sendUpdates: "all",
+          requestBody: {
+            summary: `📋 Demande spéciale — ${customName}`,
+            description: `👤 Nom : ${customName}\n📞 Téléphone : ${customPhone}\n\n📝 Demande :\n${customDescription}`,
+            start: { dateTime: startTime.toISOString(), timeZone: "Indian/Reunion" },
+            end: { dateTime: endTime.toISOString(), timeZone: "Indian/Reunion" },
+            colorId: "5",
+            attendees: [{ email: CHAUFFEUR_EMAIL }],
+            reminders: { useDefault: false, overrides: [{ method: "popup", minutes: 15 }] },
+          },
+        });
+        calendarOk = true;
+      } catch (calendarError) {
+        console.error("Google Calendar error (custom):", calendarError);
+      }
+
+      let emailsOk = false;
+      try {
+        await resend.emails.send({
+          from: FROM_EMAIL,
+          to: CHAUFFEUR_EMAIL,
+          subject: `📋 Demande spéciale — ${customName}`,
+          html: `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(9,20,36,0.08);">
+  <tr><td style="background:#1FA3BA;padding:32px 48px;">
+    <p style="margin:0 0 8px;font-size:13px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Demande spéciale</p>
+    <h1 style="margin:0;font-size:24px;font-weight:400;color:#ffffff;">📋 ${customName}</h1>
+  </td></tr>
+  <tr><td style="padding:32px 48px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid rgba(9,20,36,0.1);border-radius:12px;overflow:hidden;margin-bottom:20px;">
+      <tr style="background:rgba(9,20,36,0.03);">
+        <td style="padding:14px 18px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(9,20,36,0.4);width:140px;">Nom</td>
+        <td style="padding:14px 18px;font-size:14px;font-weight:600;color:#091424;">${customName}</td>
+      </tr>
+      <tr style="border-top:1px solid rgba(9,20,36,0.06);">
+        <td style="padding:14px 18px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(9,20,36,0.4);">Téléphone</td>
+        <td style="padding:14px 18px;font-size:14px;font-weight:600;color:#1FA3BA;">${customPhone}</td>
+      </tr>
+      <tr style="border-top:1px solid rgba(9,20,36,0.06);">
+        <td colspan="2" style="padding:14px 18px;">
+          <p style="margin:0 0 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(9,20,36,0.4);">Description</p>
+          <p style="margin:0;font-size:14px;color:#091424;white-space:pre-wrap;">${customDescription}</p>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+  <tr><td style="padding:0 48px 32px;">
+    <p style="margin:0;font-size:12px;color:rgba(9,20,36,0.35);">Demande reçue via gstransport.re</p>
+  </td></tr>
+</table>
+</td></tr></table>
+</body></html>`,
+        });
+        emailsOk = true;
+      } catch (emailError) {
+        console.error("Email error (custom):", emailError);
+      }
+
+      if (!calendarOk && !emailsOk) {
+        return NextResponse.json({ success: false, error: "Calendar and email both failed" }, { status: 500 });
+      }
+      return NextResponse.json({ success: true, calendarOk, emailsOk });
+    }
+
+    // ── Standard reservation ──
     const {
       firstName, lastName, phone, email,
       pickup, destination, tripType, vehicle,
