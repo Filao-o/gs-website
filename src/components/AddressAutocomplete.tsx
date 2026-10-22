@@ -278,11 +278,12 @@ export default function AddressAutocomplete({
                 >
                   <MapPin size={14} className="text-[#1FA3BA] shrink-0 mt-0.5" />
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-[#091424] leading-snug">{commune || mainText}</p>
+                    <p className="text-sm font-semibold text-[#091424] leading-snug">
+                      {highlightMain(mainText, mainMatches)}
+                    </p>
                     {commune && (
-                      <p className="text-xs mt-0.5 leading-snug">
-                        {highlightMain(mainText, mainMatches)}
-                        {rest ? <span className="text-[#091424]/30"> · {rest}</span> : null}
+                      <p className="text-xs mt-0.5 leading-snug text-[#091424]/50">
+                        {commune}{rest ? <span className="text-[#091424]/30"> · {rest}</span> : null}
                       </p>
                     )}
                   </div>
