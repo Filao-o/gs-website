@@ -104,12 +104,7 @@ export default function AddressAutocomplete({
       return;
     }
     serviceRef.current.getPlacePredictions(
-      {
-        input,
-        componentRestrictions: { country: "fr" },
-        location: new window.google.maps.LatLng(-21.115, 55.536),
-        radius: 50000,
-      },
+      { input, componentRestrictions: { country: "re" } },
       (results, status) => {
         if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
           setPredictions(results as unknown as Prediction[]);
