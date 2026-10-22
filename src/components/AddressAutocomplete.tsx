@@ -22,6 +22,7 @@ interface Props {
 interface Prediction {
   place_id: string;
   description: string;
+  types?: string[];
   structured_formatting?: {
     main_text: string;
     main_text_matched_substrings?: Array<{ offset: number; length: number }>;
@@ -107,7 +108,14 @@ export default function AddressAutocomplete({
       { input, componentRestrictions: { country: "re" } },
       (results, status) => {
         if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
-          setPredictions(results as unknown as Prediction[]);
+          const cityTypes = new Set(["locality", "administrative_area_level_1", "administrative_area_level_2", "sublocality", "sublocality_level_1"]);
+          const sorted = [...(results as unknown as Prediction[])].sort((a, b) => {
+            const aIsCity = a.types?.every(t => cityTypes.has(t) || t === "political" || t === "geocode") ?? false;
+            const bIsCity = b.types?.every(t => cityTypes.has(t) || t === "political" || t === "geocode") ?? false;
+            if (aIsCity === bIsCity) return 0;
+            return aIsCity ? 1 : -1;
+          });
+          setPredictions(sorted);
           setOpen(true);
         } else {
           console.warn("Places API status:", status);
