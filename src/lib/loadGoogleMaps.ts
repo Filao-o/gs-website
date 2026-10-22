@@ -18,6 +18,7 @@ export function loadGoogleMaps(): Promise<void> {
       script.async = true;
       script.defer = true;
       script.onload = () => resolve();
+      script.onerror = () => console.error("Failed to load Google Maps API — check API key and billing");
       document.head.appendChild(script);
     });
   }
